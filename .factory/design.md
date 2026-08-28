@@ -77,6 +77,8 @@ logos, no watermark, no gradients, no glowing cyber imagery, no UI mockup.”
 Generated with the factory image model (`factory-image`) on 2026-08-28. The
 asset is original to this product. Source PNG and prompt sidecar are retained
 under `assets/src/`; optimised WebP derivatives ship in `public/art/`.
+The three walkthrough images are captures of the product’s own demo, made with
+Playwright on 2026-08-28. The touch icon is a crop of the generated hero.
 
 ## Voice
 

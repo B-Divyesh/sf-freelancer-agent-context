@@ -209,6 +209,7 @@ function acceptReturnedLicense(): void {
 async function route(): Promise<void> {
   acceptReturnedLicense(); window.scrollTo(0,0);
   const path = location.pathname.replace(/\/$/, '') || '/';
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://freelancer-agent-context.sociobot.in${path}`;
   if ('__TAURI_INTERNALS__' in window && path === '/') await renderWorkspace(); else if (path === '/') landing(); else if (path === '/demo' || path === '/app') await renderWorkspace(); else if (path === '/privacy' || path === '/terms') legal(path.slice(1) as 'privacy'|'terms'); else notFound();
   const h1 = document.querySelector<HTMLElement>('h1'); if (h1) { status.textContent = h1.textContent ?? ''; requestAnimationFrame(() => h1.focus({preventScroll:true})); }
   const savedLicense = localStorage.getItem('sb_license:freelancer-agent-context');
