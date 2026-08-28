@@ -107,6 +107,16 @@ fn launch_scope(
     })
 }
 
+fn delete_workspace_scope_at(base: &Path, workspace_id: &str) -> Result<(), String> {
+    let profile_root = base.join("connector-scopes").join(safe_id(workspace_id)?);
+    if profile_root.exists() {
+        fs::remove_dir_all(&profile_root).map_err(|error| {
+            format!("Could not remove the isolated agent profile for this workspace: {error}")
+        })?;
+    }
+    Ok(())
+}
+
 fn command_exists(command: &str) -> bool {
     env::var_os("PATH").is_some_and(|paths| {
         env::split_paths(&paths).any(|path| {
@@ -311,6 +321,15 @@ fn delete_vault(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn delete_workspace_scope(app: AppHandle, workspace_id: String) -> Result<(), String> {
+    let app_data = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
+    delete_workspace_scope_at(&app_data, &workspace_id)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -318,6 +337,7 @@ pub fn run() {
             save_vault,
             load_vault,
             delete_vault,
+            delete_workspace_scope,
             launch_scoped_agent
         ])
         .run(tauri::generate_context!())
@@ -326,7 +346,7 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
-    use super::{decrypt, encrypt, launch_scope, LaunchRequest};
+    use super::{decrypt, delete_workspace_scope_at, encrypt, launch_scope, LaunchRequest};
     use std::{env, fs};
 
     #[test]
@@ -371,6 +391,29 @@ mod tests {
         let mut invalid = request("northstar");
         invalid.connector = "sh".into();
         assert!(launch_scope(&base, &invalid, base.clone()).is_err());
+        fs::remove_dir_all(base).unwrap();
+    }
+
+    #[test]
+    fn deleting_workspace_removes_its_connector_scope_and_credentials() {
+        let base = env::temp_dir().join(format!("ccf-delete-test-{}", std::process::id()));
+        let deleted_credential =
+            base.join("connector-scopes/northstar/repo/config/credential.json");
+        let retained_credential = base.join("connector-scopes/juniper/repo/config/credential.json");
+        fs::create_dir_all(deleted_credential.parent().unwrap()).unwrap();
+        fs::create_dir_all(retained_credential.parent().unwrap()).unwrap();
+        fs::write(&deleted_credential, "northstar-secret").unwrap();
+        fs::write(&retained_credential, "juniper-secret").unwrap();
+
+        delete_workspace_scope_at(&base, "northstar").unwrap();
+
+        assert!(!base.join("connector-scopes/northstar").exists());
+        assert!(!deleted_credential.exists());
+        assert!(retained_credential.exists());
+        assert_eq!(
+            fs::read_to_string(retained_credential).unwrap(),
+            "juniper-secret"
+        );
         fs::remove_dir_all(base).unwrap();
     }
 }

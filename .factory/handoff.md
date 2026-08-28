@@ -1,3 +1,58 @@
+# Repair verification — local PASS (2026-08-28)
+
+This repair addresses the two blockers recorded in verifier report commit
+`30b6805ffea6eab79149cb5fb542766bc6b1af4d` for candidate
+`9ecd63eac1e13a8ccd405ee82cc5a79016666d50`.
+
+- **Offboarding deletion:** the desktop Delete workspace confirmation now names
+  the isolated profile. It invokes `delete_workspace_scope` before changing
+  the encrypted vault, removing the complete
+  `connector-scopes/<workspace-id>/` tree (credentials, config, data, cache,
+  and launch scripts). If removal fails, the workspace remains and the user
+  gets a recovery message. The new `workspace-deletion` claim executes
+  `deleting_workspace_removes_its_connector_scope_and_credentials`, which
+  creates two profile trees and proves the deleted client's credential file is
+  gone while the other client's remains.
+- **Mobile performance:** the public landing page no longer imports the Tauri
+  bridge up front, and its GitHub release-metadata request begins only after
+  the initial screen settles. The Playwright regression verifies no release
+  API request occurs during the first 500 ms and that it starts afterward.
+
+Exact verification on Ubuntu 24.04, Node 22, Rust 1.98.0, and Playwright
+1.58.2:
+
+```sh
+npm ci
+npm test
+npm run lint
+cargo test --manifest-path src-tauri/Cargo.toml
+npm run build
+CI=1 npm run tauri -- build
+```
+
+- `npm ci`: 65 packages, 0 vulnerabilities.
+- `npm test`: 1 Vitest and 15 Playwright tests passed, including keyboard,
+  axe serious/critical, 390 px mobile, privacy request, offline/update, and
+  release-request deferral checks.
+- `npm run lint`: TypeScript, Rust format, and Clippy with `-D warnings`
+  passed.
+- Rust: all 3 tests passed, including the new deletion claim regression.
+- Every command in the expanded 12-claim `.factory/claims.json` passed from
+  the clean install.
+- Static build: initial JS 30.86 KB (10.41 KB gzip), deferred desktop bridge
+  chunk 2.44 KB (0.98 KB gzip), CSS 16.30 KB (4.38 KB gzip).
+- Local Lighthouse 12.8.2 mobile: Performance **100**, Accessibility **100**,
+  LCP 1.5 s, TBT 0 ms, CLS 0.
+- `CI=1 npm run tauri -- build` produced Linux AppImage, deb, and rpm. SHA-256:
+  AppImage `4846ddc551bbe157327f0133d9821b8114e03d87f8c4de13d2423a549fe45aa4`,
+  deb `b8939e7c9bde9ee39f33a66160bd1871858406c6c7955a5bd84e73c53a5c640b`,
+  rpm `38b882e7bedef71ebf24c507021652d0d87fce1d18347b8fb0c094da3f12e0e5`.
+
+Deployment and the fresh live Lighthouse result are recorded after the repair
+commit is pushed.
+
+---
+
 # Independent verification update — FAIL (2026-08-28)
 
 Candidate `9ecd63eac1e13a8ccd405ee82cc5a79016666d50` at

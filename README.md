@@ -25,6 +25,9 @@ The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. Choose a
 local project folder, then sign in inside that client’s isolated profile. Your
 chosen coding agent may use its own online service.
 
+Deleting a desktop workspace removes its workspace records and the complete
+isolated connector credential and config profile for that client.
+
 The site works offline after the first visit. A new release replaces the
 previous cached application shell.
 

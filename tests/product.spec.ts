@@ -10,6 +10,19 @@ test('landing page has one clear first action and no serious accessibility issue
   expect(results.violations.filter(item => ['serious','critical'].includes(item.impact ?? ''))).toEqual([]);
 });
 
+test('landing defers the release metadata request until after the first screen settles', async ({ page }) => {
+  let releaseRequests = 0;
+  await page.route('https://api.github.com/repos/B-Divyesh/sf-freelancer-agent-context/releases?per_page=1', async route => {
+    releaseRequests += 1;
+    await route.fulfill({json: [{assets: []}]});
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
+  await page.waitForTimeout(500);
+  expect(releaseRequests).toBe(0);
+  await expect.poll(() => releaseRequests, {timeout: 4_000}).toBe(1);
+});
+
 test('all routes are console-clean with one heading and no serious accessibility issues', async ({page}) => {
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];

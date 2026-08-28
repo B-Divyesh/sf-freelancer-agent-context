@@ -1,6 +1,5 @@
 import './style.css';
-import { invoke } from '@tauri-apps/api/core';
-import { clearDemo, getStorageError, loadState, saveState } from './store';
+import { clearDemo, getStorageError, loadState, removeWorkspaceScope, saveState } from './store';
 import type { AppState, Connector, Source, Workspace } from './types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -61,7 +60,10 @@ function landing(): void {
   </main>${footer()}`;
   wireShared();
   document.querySelector('#restore-license')?.addEventListener('click', showLicensePrompt);
-  loadDownload();
+  // Release metadata is useful, but it is not part of the first mobile task.
+  // Start it after the initial visual and input work have settled, rather than
+  // allowing an off-origin JSON response to contend with the cold render.
+  window.setTimeout(() => void loadDownload(), 3000);
 }
 
 async function loadDownload(): Promise<void> {
@@ -142,8 +144,17 @@ function wireWorkspace(): void {
     state.workspaces.push(workspace); state.activeId = workspace.id; await saveState(state, demo); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
   });
   document.querySelector('#delete-workspace')?.addEventListener('click', async () => {
-    const active = state.workspaces.find(w => w.id === state.activeId); if (!active || !confirm(`Delete ${active.name} and its local records?`)) return;
-    state.workspaces = state.workspaces.filter(w => w.id !== active.id); state.sessions = state.sessions.filter(s => s.workspaceId !== active.id); state.activeId = state.workspaces[0]?.id ?? null; await saveState(state, demo); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
+    const active = state.workspaces.find(w => w.id === state.activeId);
+    if (!active || !confirm(`Delete ${active.name}, its local records, and its isolated agent profile?`)) return;
+    try {
+      // Clean the on-disk profile first. If cleanup fails, leave the workspace
+      // intact so its user can retry rather than believing it was offboarded.
+      await removeWorkspaceScope(active.id, demo);
+    } catch {
+      notice = 'The workspace was not deleted because its isolated agent profile could not be removed. Close the agent, then try again.';
+      app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); return;
+    }
+    state.workspaces = state.workspaces.filter(w => w.id !== active.id); state.sessions = state.sessions.filter(s => s.workspaceId !== active.id); state.activeId = state.workspaces[0]?.id ?? null; await saveState(state, demo); notice = 'Workspace and isolated agent profile deleted.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
   });
   document.querySelector('#preflight-form')?.addEventListener('submit', runPreflight);
   document.querySelector('#boundary-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.brief = String(data.get('brief')); active.voice = String(data.get('voice')); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Client brief saved.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
@@ -182,6 +193,7 @@ async function launchScopedAgent(sourceId: string, button: HTMLButtonElement): P
   button.disabled = true;
   if (statusNode) statusNode.textContent = `Opening ${source.connector} in the ${workspace.name} profile…`;
   try {
+    const { invoke } = await import('@tauri-apps/api/core');
     const receipt = await invoke<{ profileDir: string }>('launch_scoped_agent', { request: {
       workspaceId: workspace.id,
       workspaceName: workspace.name,
@@ -203,7 +215,7 @@ function exportLatest(): void {
 
 function legal(kind: 'privacy'|'terms'): void {
   const privacy = kind === 'privacy'; document.title = `${privacy ? 'Privacy' : 'Terms'} — Client Context Firewall`;
-  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets separate connector credential and config folders. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data. Your chosen coding agent may use its own online service. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app. Export a delivery record before offboarding if you need an audit trail.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
+  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets separate connector credential and config folders. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data. Your chosen coding agent may use its own online service. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app to remove its local records and complete isolated connector profile. Export a delivery record before offboarding if you need an audit trail.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
 }
 
 function notFound(): void { document.title = 'Page not found — Client Context Firewall'; app.innerHTML = `${header()}<main id="main" class="not-found" tabindex="-1"><p class="huge">404</p><h1 tabindex="-1">This page crossed the wrong boundary</h1><p>The address does not match a page in this workspace.</p><a class="button primary nav-link" href="/">Return home</a></main>${footer()}`; wireShared(); }
