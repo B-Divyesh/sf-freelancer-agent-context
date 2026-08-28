@@ -6,8 +6,8 @@ export const sampleWorkspaces: Workspace[] = [
     brief: 'Ship the wholesale reorder portal. Keep the checkout copy direct and friendly.',
     voice: 'Short sentences. Use “shops”, not “partners”. Never promise same-day delivery.',
     sources: [
-      { id: 'ns-git', label: 'northstar/reorder', account: 'dev@northstar.example', kind: 'Git' },
-      { id: 'ns-drive', label: 'Wholesale briefs', account: 'sam@northstar.example', kind: 'Drive' }
+      { id: 'ns-git', label: 'northstar/reorder', account: 'dev@northstar.example', kind: 'Git', connector: 'codex', folder: '/projects/northstar-reorder' },
+      { id: 'ns-drive', label: 'Wholesale briefs', account: 'sam@northstar.example', kind: 'Drive', connector: 'claude', folder: '/projects/northstar-briefs' }
     ],
     rules: [
       { id: 'ns-secret', term: 'NS_LIVE_KEY', replacement: '[REDACTED KEY]' },
@@ -19,8 +19,8 @@ export const sampleWorkspaces: Workspace[] = [
     brief: 'Prepare the intake prototype for solo legal practices. No production client records.',
     voice: 'Precise and calm. Explain each legal term the first time it appears.',
     sources: [
-      { id: 'jl-git', label: 'juniper/intake', account: 'contractor@juniper.example', kind: 'Git' },
-      { id: 'jl-chat', label: 'Product channel', account: 'contractor-jl', kind: 'Chat' }
+      { id: 'jl-git', label: 'juniper/intake', account: 'contractor@juniper.example', kind: 'Git', connector: 'codex', folder: '/projects/juniper-intake' },
+      { id: 'jl-chat', label: 'Product channel', account: 'contractor-jl', kind: 'Chat', connector: 'gemini', folder: '/projects/juniper-notes' }
     ],
     rules: [
       { id: 'jl-secret', term: 'JUNIPER_TOKEN', replacement: '[REDACTED TOKEN]' },

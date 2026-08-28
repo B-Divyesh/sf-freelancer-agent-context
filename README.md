@@ -3,9 +3,10 @@
 Keep each client’s sources, rules, and delivery record in one local workspace.
 
 Client Context Firewall is for freelance developers who switch between client
-accounts while using coding agents. It checks the selected source account,
-other client names, and redaction terms before a session starts. A finished
-check can be exported as a JSON delivery record.
+accounts while using coding agents. The desktop app opens each agent with
+separate credential and config folders for that client. It also checks other
+client names and redaction terms before launch. A finished check can be
+exported as a JSON delivery record.
 
 ## Try the isolated demo
 
@@ -17,17 +18,21 @@ demo** at any time.
 ## Privacy and limits
 
 The desktop app encrypts its local workspace file with AES-256-GCM. Its random
-key is stored in the operating system credential manager. Workspace data is
-not sent off the device. The browser preview uses local storage.
+key is stored in the operating system credential manager. The browser preview
+stores workspaces locally and does not send workspace data off-origin.
 
-Client Context Firewall is a guardrail. It does not inspect other apps and
-cannot prevent every disclosure. It works offline after the first site visit.
+The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. Choose a
+local project folder, then sign in inside that client’s isolated profile. Your
+chosen coding agent may use its own online service.
+
+The site works offline after the first visit. A new release replaces the
+previous cached application shell.
 
 ## Plans
 
-Free includes two client workspaces, all boundary checks, and delivery exports.
-Pro costs $19 per month and adds unlimited workspaces. Checkout and license
-verification use the Sociobot billing API.
+Free includes two client workspaces. Checks and delivery exports remain
+available on the free plan. Pro costs $19 once and allows more than two
+workspaces. Checkout and license verification use the Sociobot billing API.
 No product ID or payment provider is embedded in this repository.
 
 ## Develop and verify
@@ -36,15 +41,18 @@ Requirements: Node 22 and, for desktop builds, the current Rust toolchain plus
 the [Tauri 2 system dependencies](https://v2.tauri.app/start/prerequisites/).
 
 ```sh
-npm install
+npm ci
 npm run dev
 npm test
+npm run typecheck
+npm run lint
 npm run build
 ```
 
 `npm run build` produces the static site at `dist/site/`. Run
-`npm run tauri build` for the desktop package on a supported host. GitHub
-Actions builds macOS, Windows, and Linux release assets from a `v*` tag.
+`npm run tauri -- build` for the desktop package on a supported host. On Linux,
+install the Tauri 2 system packages, `libsecret-1-dev`, `libfuse2`, `file`, and `rpm`.
+GitHub Actions builds macOS, Windows, and Linux assets from a `v*` tag.
 
 ## Routes
 

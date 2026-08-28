@@ -52,6 +52,11 @@ ledger. On a phone, the rail becomes a horizontal client picker and the ledger
 stacks. The landing page is editorial and asymmetric, not a centred hero or a
 feature-card grid.
 
+The repaired launch action remains part of the same ledger grammar. A passed
+check exposes one labelled agent-launch control per selected source. Status
+text reports the client-only profile path without adding a modal or a second
+visual system.
+
 ## Motion policy
 
 The signature motion is a 220 ms print-pass reveal: a fine dot layer settles

@@ -7,18 +7,28 @@ const key = (demo: boolean) => `${demo ? 'demo:' : 'ccf:'}workspace-state`;
 let storageError = '';
 export const getStorageError = () => storageError;
 
+function migrateState(state: AppState): AppState {
+  for (const workspace of state.workspaces) {
+    for (const source of workspace.sources) {
+      source.connector ||= 'codex';
+      source.folder ||= '';
+    }
+  }
+  return state;
+}
+
 export async function loadState(demo: boolean): Promise<AppState> {
   if (demo) {
     const saved = sessionStorage.getItem(key(true));
-    return saved ? JSON.parse(saved) : sampleState();
+    return saved ? migrateState(JSON.parse(saved)) : sampleState();
   }
   try {
     if (isTauri()) {
       const saved = await invoke<string | null>('load_vault');
-      return saved ? JSON.parse(saved) : emptyState();
+      return saved ? migrateState(JSON.parse(saved)) : emptyState();
     }
     const saved = localStorage.getItem(key(false));
-    storageError = ''; return saved ? JSON.parse(saved) : emptyState();
+    storageError = ''; return saved ? migrateState(JSON.parse(saved)) : emptyState();
   } catch {
     storageError = 'Your local workspace could not be opened. Check the device credential manager, then reopen the app.';
     return emptyState();

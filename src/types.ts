@@ -1,4 +1,12 @@
-export type Source = { id: string; label: string; account: string; kind: 'Git' | 'Drive' | 'Chat' | 'Folder' };
+export type Connector = 'codex' | 'claude' | 'gemini';
+export type Source = {
+  id: string;
+  label: string;
+  account: string;
+  kind: 'Git' | 'Drive' | 'Chat' | 'Folder';
+  connector: Connector;
+  folder: string;
+};
 export type Rule = { id: string; term: string; replacement: string };
 export type Workspace = {
   id: string;
