@@ -48,8 +48,25 @@ CI=1 npm run tauri -- build
   deb `b8939e7c9bde9ee39f33a66160bd1871858406c6c7955a5bd84e73c53a5c640b`,
   rpm `38b882e7bedef71ebf24c507021652d0d87fce1d18347b8fb0c094da3f12e0e5`.
 
-Deployment and the fresh live Lighthouse result are recorded after the repair
-commit is pushed.
+Repair commit `e3df965e30006b8e59e743b85fe4b1e1d39f2fd3` was pushed to `main`.
+It was deployed as Static Web Apps deployment
+`a3c46911-630b-473b-99b0-bf77eb5e3862` at
+<https://freelancer-agent-context.sociobot.in>.
+
+- Live `index.html` SHA-256 is
+  `5b30d4ed44540e395ee01e6768b92109e94e71989a2723ac958972b9f777ee84`;
+  live initial JS SHA-256 is
+  `b2dad3e57f27dcd1d11d87e8a832aad6733f259e5bb11f533984ab00cb9e97d3`.
+  Both exactly match local production output.
+- Fresh live Lighthouse 12.8.2 mobile: Performance **99**, Accessibility
+  **100**, Best Practices **100**, SEO **100**; LCP 1.7 s, TBT 0 ms, CLS 0.
+- Fresh live browser smoke check passed on `/`, `/demo`, `/privacy`, `/terms`,
+  and the 404: one H1 each, no console/page errors, and no axe
+  serious/critical findings. Keyboard skip-link and dialog Escape behavior,
+  service-worker offline reload, and 390×844 mobile layout all passed.
+- A fresh direct `/demo` context completed the sample check with zero
+  off-origin requests. Live headers include HSTS, `nosniff`, the documented
+  CSP with `frame-ancestors 'none'`, and strict-origin referrer policy.
 
 ---
 
