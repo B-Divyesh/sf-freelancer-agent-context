@@ -363,6 +363,11 @@ mod tests {
             juniper.environment["XDG_CONFIG_HOME"]
         );
         assert_eq!(northstar.connector, "codex");
+        for connector in ["codex", "claude", "gemini"] {
+            let mut allowed = request("northstar");
+            allowed.connector = connector.into();
+            assert!(launch_scope(&base, &allowed, folder.clone()).is_ok());
+        }
         let mut invalid = request("northstar");
         invalid.connector = "sh".into();
         assert!(launch_scope(&base, &invalid, base.clone()).is_err());

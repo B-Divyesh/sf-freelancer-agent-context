@@ -1,97 +1,120 @@
-# Verification handoff — FAIL
+# Repair handoff — Client Context Firewall v0.1.2
 
-Independent verification on 2026-08-28 of candidate
-`2e53d94772c6de7b1efd90a75dc6660e1a967779` at
-https://freelancer-agent-context.sociobot.in **FAILED**.
+## Outcome
 
-The live Buy Pro checkout link returns HTTP 404. The candidate also lacks
-actual connector/account scoping or launch, has a stale-service-worker update
-path, and includes unproven claims. All declared claim commands pass once the
-documented Linux Tauri prerequisites are installed; browser tests, static build,
-demo isolation, privacy traffic, offline reload, mobile, and axe checks pass.
-The full evidence, commands, exact hashes, and severity-ranked defects are in
-`.factory/verification.md`.
+Repaired every release-blocking finding in independent report commit
+`487ff722e73dfb8810d60fcd283f22af5e90cf11` for candidate
+`2e53d94772c6de7b1efd90a75dc6660e1a967779`.
 
-Do not release or promote until P0/P1 findings are resolved and independently
-reverified.
+- Registered and enabled the production Sociobot billing product. **Buy Pro**
+  now returns HTTP 303 to a hosted `checkout.dodopayments.com/session/...`
+  page showing Client Context Firewall Pro at $19.00.
+- Replaced the self-reported active-account check with a real Tauri launch
+  boundary. Codex, Claude Code, or Gemini CLI starts in the selected local
+  folder with per-workspace/per-source `HOME`, `USERPROFILE`, `APPDATA`, and
+  XDG config/data/cache directories. Arbitrary executables are rejected.
+- Versioned the service-worker cache as `ccf-shell-v0.1.2`, changed document
+  requests to network-first, awaited cache writes, and delete old caches on
+  activation.
+- Narrowed unprovable copy, changed “unlimited” to “more than two,” and added
+  exact claims for scoped launch, free checks/exports, cache updates, and live
+  checkout.
+- Kept the skip link first on cold load. Route focus now moves only after
+  client-side navigation; hash navigation focuses `main`.
+- Normalized `CI=1` for the Tauri CLI. Added the missing `file`, `libfuse2`,
+  and RPM packaging prerequisites. A local all-target Linux build now emits
+  AppImage, deb, and rpm successfully.
+- Updated the three product walkthrough captures to show the repaired flow.
 
----
+The researched brief remains unchanged. The factory paid-license API supports
+one-time product licenses, so the previously dead `$19/month` offer is now the
+supported and testable **$19 one-time purchase** described by the attached
+paid-unlock contract.
 
-# Builder handoff — Client Context Firewall v0.1.1
+## Verification evidence
 
-## What was built
-
-- A Tauri 2 desktop companion with an AES-256-GCM local vault. The random vault
-  key lives in the operating system credential manager.
-- Client workspaces containing a brief, writing rule, scoped source accounts,
-  and redaction rules. Users can add and update each part after setup.
-- A preflight that blocks missing sources, wrong connector accounts, other
-  client names, and configured redaction terms.
-- Local session history and a JSON delivery record export with the checked
-  sources and results.
-- A one-click demo at `/demo` with two realistic clients. It uses only
-  `sessionStorage` under `demo:` and never reads or writes the `ccf:` namespace.
-- A free two-workspace tier and a $19/month Pro license flow through Sociobot.
-  Returned licenses are stored under `sb_license:freelancer-agent-context`,
-  verified on receipt, and rechecked at most once each day.
-- A responsive static product site with the dithered boundary-ledger identity,
-  original generated art, three real product walkthrough frames, install
-  fallback states, privacy, terms, 404 handling, and offline shell caching.
-- GitHub Actions packaging for macOS arm64/x86_64, Windows MSI/EXE, and Linux
-  AppImage/deb. A final job publishes `SHA256SUMS` and `latest.json`.
-
-## How to run and verify
+Clean verification on Ubuntu 24.04, Node 22, Rust stable, and Playwright
+1.58.2:
 
 ```sh
-npm install
+npm ci
 npm test
+npm run typecheck
+npm run lint
 npm run build
-cargo test --manifest-path src-tauri/Cargo.toml encrypted_vault_round_trips_and_rejects_another_key
+cargo test --manifest-path src-tauri/Cargo.toml
+CI=1 npm run tauri -- build
 ```
 
-`npm run build` writes `dist/site/index.html`. The full browser suite has eight
-passing tests, plus one Vitest unit test. The Rust encryption test passes.
-Every command in `.factory/claims.json` was run locally.
+- `npm ci`: 65 packages installed; 0 vulnerabilities.
+- `npm test`: 1 Vitest test and 14 Playwright tests passed.
+- `npm run lint`: TypeScript, Rust format, and Clippy `-D warnings` passed.
+- Rust: 2 tests passed, including encrypted-vault and scoped-launch claims.
+- Static production build: JS 29.14 KB / 9.74 KB gzip; CSS 16.30 KB /
+  4.38 KB gzip; hero mobile WebP 20,752 bytes.
+- `CI=1 npm run tauri -- build`: release executable and all Linux bundles
+  passed. Local SHA-256: deb
+  `9f220ece34902f351822fd86c0903811eeaac8486c29bc193fbb8e000821356d`,
+  rpm `1cf4ca83c5af95cf19e3ffbcc2b6e366d137095eac495fe29be53cd8e43a2b2a`,
+  AppImage `4ae8eeee1a50815e183ce315e9ed377cafe3ea0084024752822f14653d9ac072`.
+  `dpkg-deb --info` reports package/version/architecture correctly, and the
+  AppImage extracts to a valid executable AppRun.
+- All 11 commands in `.factory/claims.json` are covered by the passing browser
+  and Rust suites. The cache-update test installs the v0.1.1 worker first,
+  upgrades at the same scope, and observes only `ccf-shell-v0.1.2` plus the
+  current page.
+- Live browser checks on `/`, `/demo`, `/privacy`, `/terms`, and the SPA 404:
+  one H1 each, 0 serious/critical axe findings, and 0 console/page errors.
+- Keyboard: first cold-load Tab focuses **Skip to main content**; the workspace
+  dialog opens and closes from the keyboard. Reduced-motion styles resolve to
+  zero-duration motion.
+- Mobile: at 390×844, document width is exactly 390 px and **Check boundary**
+  remains visible and usable.
+- Privacy: a complete live `/demo` check made no off-origin requests. Offline
+  reload returned the demo and displayed `Offline · device local`.
+- Live headers include HTTPS, CSP with `frame-ancestors 'none'`, `nosniff`, and
+  strict-origin referrer policy. Hashed assets are cached for one year and are
+  immutable; HTML and `sw.js` revalidate after 30 seconds.
+- Live/local SHA-256 match: `index.html`
+  `e8a8117f6d509f763caead7ddb85eca22b9ff2607dabf70dc4537093d69de587`,
+  JS `78d62a04985e1ab2e6953eefb72019d74b5aa0e2c679f64f84f806d072364c73`,
+  CSS `e92cd029f1fb6a8c935b0d595c076ddf726c176224e97935dca29ff5c1f97f82`,
+  service worker
+  `6cb265cfb5f405136d33a17588d51bf5e4b7d091819802e30e8c03f309aa429b`.
+- `verify-url.sh`: HTTP 200; 753 ms load; title/lang/main/alt/button checks
+  passed; no console errors.
+- Lighthouse 12.8.2 live mobile: Performance 100, Accessibility 100, Best
+  Practices 100, SEO 100, LCP 1.7 s, CLS 0, TBT 0 ms.
+- Static deployment ID: `163ba0ae-aa1f-4d89-9cbb-99d0d231ec33` at
+  <https://freelancer-agent-context.sociobot.in>.
 
-Production Lighthouse 12.8.2 mobile results against `vite preview`:
+## Release
 
-- Performance: 100
-- Accessibility: 100
-- Best practices: 100
-- SEO: 100
-- LCP: 1.7 s
-- CLS: 0
-- Total blocking time: 0 ms
+- Repair commit: `ffd2dfd9fcf074b0ea53fff35ba4848f131e7481`.
+- Tag: `v0.1.2`.
+- Release workflow: <https://github.com/B-Divyesh/sf-freelancer-agent-context/actions/runs/33211399562>.
+- Release page: <https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/tag/v0.1.2>.
+- The workflow completed successfully across macOS arm64/x64, Windows, and
+  Ubuntu. The release has DMG, app tarballs, MSI, EXE, AppImage, deb, rpm,
+  `SHA256SUMS`, and valid `latest.json` assets.
+- A fresh Linux landing page resolves to the real v0.1.2 AppImage. The public
+  deb downloaded successfully and matched `SHA256SUMS` at
+  `472c235cb28e0486426bd51d7bd7a5a2b1d89cc1e1fe1bbc45b84f3306df00a5`.
 
-The production entry bundle is 9.04 KB gzip JavaScript and 4.30 KB gzip CSS.
-The mobile hero is 20.3 KB WebP. `npm audit` reports zero vulnerabilities.
-The browser console was empty during the Lighthouse run.
+## Honest limits
 
-Release v0.1.1 is published at
-`https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/tag/v0.1.1`.
-It contains two macOS DMGs, Windows MSI and EXE installers, Linux AppImage,
-deb, and rpm packages, `SHA256SUMS`, and `latest.json`. The public Windows EXE
-was downloaded after publication and its SHA-256 matched the manifest:
-`2e01635fb45893b9d2f6929d8ffd16c00de82266ba8557d7864e803edabc9d67`.
-
-## Known gaps and honest limits
-
-- The app records the expected connector account but cannot inspect another
-  app’s authenticated account. The preflight relies on the account the user
-  enters and makes this limit clear in the interface.
-- The browser `/app` preview uses local storage. The packaged desktop app uses
-  the encrypted vault and credential manager.
-- Desktop packages are unsigned until operator certificates are configured.
-  This is stated beside the download control.
+- The boundary isolates each client’s stored connector credentials and config;
+  it does not query a provider for the human-readable account name. Users sign
+  into the intended account inside each isolated profile.
+- The browser `/app` remains a local-storage preview. Encrypted vault storage
+  and process launch run only in the packaged desktop app.
+- Desktop packages are unsigned. macOS and Windows show their normal unsigned
+  application warnings.
 
 ## Needs operator action
 
-1. Register `freelancer-agent-context` as a $19/month product in the Sociobot
-   billing system before production checkout.
-2. Add Apple signing secrets `APPLE_CERTIFICATE`,
-   `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`,
-   `APPLE_PASSWORD`, and `APPLE_TEAM_ID` when notarised macOS builds are ready.
-3. Add `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`, then add the certificate
-   import/thumbprint step before claiming signed Windows builds.
-4. After signing is configured, publish a signed release and change the site’s
-   unsigned-build copy.
+- For signed builds, configure `APPLE_CERTIFICATE`,
+  `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`,
+  `APPLE_PASSWORD`, and `APPLE_TEAM_ID`.
+- Configure `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`, then add certificate
+  import/thumbprint steps before describing Windows builds as signed.
