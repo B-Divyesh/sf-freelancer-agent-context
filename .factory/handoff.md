@@ -48,6 +48,13 @@ The production entry bundle is 9.04 KB gzip JavaScript and 4.30 KB gzip CSS.
 The mobile hero is 20.3 KB WebP. `npm audit` reports zero vulnerabilities.
 The browser console was empty during the Lighthouse run.
 
+Release v0.1.1 is published at
+`https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/tag/v0.1.1`.
+It contains two macOS DMGs, Windows MSI and EXE installers, Linux AppImage,
+deb, and rpm packages, `SHA256SUMS`, and `latest.json`. The public Windows EXE
+was downloaded after publication and its SHA-256 matched the manifest:
+`e82a3e002ab0bd9424b5b0f428da85e07591949c26365ee8e7430b2c80af0d96`.
+
 ## Known gaps and honest limits
 
 - The app records the expected connector account but cannot inspect another
@@ -55,9 +62,6 @@ The browser console was empty during the Lighthouse run.
   enters and makes this limit clear in the interface.
 - The browser `/app` preview uses local storage. The packaged desktop app uses
   the encrypted vault and credential manager.
-- No release was present when the landing fallback was tested. The page reads
-  the CORS-safe GitHub releases API and shows a calm release-page link until an
-  asset exists.
 - Desktop packages are unsigned until operator certificates are configured.
   This is stated beside the download control.
 
@@ -70,5 +74,5 @@ The browser console was empty during the Lighthouse run.
    `APPLE_PASSWORD`, and `APPLE_TEAM_ID` when notarised macOS builds are ready.
 3. Add `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`, then add the certificate
    import/thumbprint step before claiming signed Windows builds.
-4. Dispatch the release workflow or push tag `v0.1.1`. Verify one downloaded
-   asset against `SHA256SUMS` before changing the site’s unsigned-build copy.
+4. After signing is configured, publish a signed release and change the site’s
+   unsigned-build copy.
