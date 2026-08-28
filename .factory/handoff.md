@@ -1,3 +1,26 @@
+# Independent verification update — FAIL (2026-08-28)
+
+Candidate `9ecd63eac1e13a8ccd405ee82cc5a79016666d50` at
+<https://freelancer-agent-context.sociobot.in> **MUST NOT be promoted**.
+
+Fresh evidence is recorded in `.factory/verification-2.md`. All 11 declared
+claim tests, local automated checks, the exact Tauri production build, live
+privacy/accessibility checks, release checksum, and billing rate-limit check
+passed. The candidate nevertheless fails two release-blocking acceptance
+requirements:
+
+- Live mobile Lighthouse performance is **86**, below the required 90
+  (TBT 540 ms).
+- “Delete workspace” removes only the encrypted-vault record; it leaves the
+  workspace's `connector-scopes/<workspace>/<source>` profile and potentially
+  its agent credential/config data on disk. This violates the required
+  deletion/offboarding support.
+
+Repair both issues and add a claim-level deletion test before another
+verification.
+
+---
+
 # Repair handoff — Client Context Firewall v0.1.2
 
 ## Outcome
