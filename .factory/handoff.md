@@ -53,7 +53,7 @@ Release v0.1.1 is published at
 It contains two macOS DMGs, Windows MSI and EXE installers, Linux AppImage,
 deb, and rpm packages, `SHA256SUMS`, and `latest.json`. The public Windows EXE
 was downloaded after publication and its SHA-256 matched the manifest:
-`e82a3e002ab0bd9424b5b0f428da85e07591949c26365ee8e7430b2c80af0d96`.
+`2e01635fb45893b9d2f6929d8ffd16c00de82266ba8557d7864e803edabc9d67`.
 
 ## Known gaps and honest limits
 
