@@ -1,4 +1,4 @@
-# Handoff — Client Context Firewall v0.1.0
+# Handoff — Client Context Firewall v0.1.1
 
 ## What was built
 
@@ -44,7 +44,7 @@ Production Lighthouse 12.8.2 mobile results against `vite preview`:
 - CLS: 0
 - Total blocking time: 0 ms
 
-The production entry bundle is 9.01 KB gzip JavaScript and 4.30 KB gzip CSS.
+The production entry bundle is 9.04 KB gzip JavaScript and 4.30 KB gzip CSS.
 The mobile hero is 20.3 KB WebP. `npm audit` reports zero vulnerabilities.
 The browser console was empty during the Lighthouse run.
 
@@ -70,5 +70,5 @@ The browser console was empty during the Lighthouse run.
    `APPLE_PASSWORD`, and `APPLE_TEAM_ID` when notarised macOS builds are ready.
 3. Add `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`, then add the certificate
    import/thumbprint step before claiming signed Windows builds.
-4. Dispatch the release workflow or push tag `v0.1.0`. Verify one downloaded
+4. Dispatch the release workflow or push tag `v0.1.1`. Verify one downloaded
    asset against `SHA256SUMS` before changing the site’s unsigned-build copy.

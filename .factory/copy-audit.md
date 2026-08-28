@@ -39,7 +39,7 @@ word. Headings, labels, and buttons are included even when they are fragments.
 | It checks the information you give it. | 7 | Pass |
 | Install your local workspace | 4 | Pass |
 | Choose the package for your system when releases are published. | 10 | Pass |
-| Current v0.1 builds are unsigned. | 5 | Pass |
+| Current builds are unsigned. | 4 | Pass |
 | Downloads are being published. | 4 | Pass |
 | More clients, same local boundary | 5 | Pass |
 | Pro adds unlimited workspaces. | 4 | Pass |
