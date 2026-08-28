@@ -1,0 +1,74 @@
+name: Release desktop apps
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --target aarch64-apple-darwin
+            rust_target: aarch64-apple-darwin
+          - platform: macos-13
+            args: --target x86_64-apple-darwin
+            rust_target: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            args: ''
+            rust_target: ''
+          - platform: windows-latest
+            args: ''
+            rust_target: ''
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: '${{ matrix.rust_target }}' }
+      - name: Install Linux packages
+        if: matrix.platform == 'ubuntu-22.04'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsecret-1-dev
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0
+        env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        with:
+          tagName: v__VERSION__
+          releaseName: Client Context Firewall v__VERSION__
+          releaseBody: Unsigned desktop builds. Check SHA256SUMS before opening an installer.
+          releaseDraft: false
+          prerelease: false
+          args: '${{ matrix.args }}'
+
+  checksums:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release assets
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: gh release download "${GITHUB_REF_NAME}" --repo "$GITHUB_REPOSITORY" --dir release
+      - name: Write checksums and manifest
+        run: |
+          cd release
+          sha256sum * > SHA256SUMS
+          python3 - <<'PY'
+          import json, os
+          repo=os.environ['GITHUB_REPOSITORY']; version=os.environ['GITHUB_REF_NAME']
+          files=[f for f in os.listdir('.') if f not in ('SHA256SUMS','latest.json')]
+          platforms={
+            'mac': [f for f in files if f.endswith('.dmg')],
+            'windows': [f for f in files if f.endswith(('.msi','.exe'))],
+            'linux': [f for f in files if f.endswith(('.AppImage','.deb'))]
+          }
+          out={'version':version,'platforms':{k:[f'https://github.com/{repo}/releases/download/{version}/{n}' for n in v] for k,v in platforms.items()}}
+          open('latest.json','w').write(json.dumps(out,indent=2))
+          PY
+      - name: Upload manifests
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: gh release upload "${GITHUB_REF_NAME}" release/SHA256SUMS release/latest.json --repo "$GITHUB_REPOSITORY" --clobber
