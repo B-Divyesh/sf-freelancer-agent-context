@@ -4,6 +4,8 @@ import type { AppState } from './types';
 
 const isTauri = () => '__TAURI_INTERNALS__' in window;
 const key = (demo: boolean) => `${demo ? 'demo:' : 'ccf:'}workspace-state`;
+let storageError = '';
+export const getStorageError = () => storageError;
 
 export async function loadState(demo: boolean): Promise<AppState> {
   if (demo) {
@@ -16,17 +18,23 @@ export async function loadState(demo: boolean): Promise<AppState> {
       return saved ? JSON.parse(saved) : emptyState();
     }
     const saved = localStorage.getItem(key(false));
-    return saved ? JSON.parse(saved) : emptyState();
+    storageError = ''; return saved ? JSON.parse(saved) : emptyState();
   } catch {
+    storageError = 'Your local workspace could not be opened. Check the device credential manager, then reopen the app.';
     return emptyState();
   }
 }
 
 export async function saveState(state: AppState, demo: boolean): Promise<void> {
-  const serialized = JSON.stringify(state);
-  if (demo) sessionStorage.setItem(key(true), serialized);
-  else if (isTauri()) await invoke('save_vault', { contents: serialized });
-  else localStorage.setItem(key(false), serialized);
+  try {
+    const serialized = JSON.stringify(state);
+    if (demo) sessionStorage.setItem(key(true), serialized);
+    else if (isTauri()) await invoke('save_vault', { contents: serialized });
+    else localStorage.setItem(key(false), serialized);
+    storageError = '';
+  } catch {
+    storageError = 'This change could not be saved. Check device storage, then try again.';
+  }
 }
 
 export function clearDemo(): void { sessionStorage.removeItem(key(true)); }

@@ -1,5 +1,5 @@
 import './style.css';
-import { clearDemo, loadState, saveState } from './store';
+import { clearDemo, getStorageError, loadState, saveState } from './store';
 import type { AppState, Workspace } from './types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -9,13 +9,14 @@ const REPO = 'B-Divyesh/sf-freelancer-agent-context';
 let state: AppState;
 let demo = false;
 let notice = '';
+let licenseNotice = false;
 
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]!));
 const uid = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
 
 function header(): string {
   return `<header class="site-header">
-    <a class="wordmark nav-link" href="/" aria-label="Client Context Firewall home"><span class="mark" aria-hidden="true">CF</span><span>Client Context Firewall</span></a>
+    <a class="wordmark nav-link" href="/"><span class="mark">CF</span><span>Client Context Firewall</span></a>
     <nav aria-label="Main navigation"><a class="nav-link" href="/demo">Demo</a><a class="nav-link" href="/app">Workspace</a><a class="nav-link" href="/privacy">Privacy</a></nav>
   </header>`;
 }
@@ -40,19 +41,19 @@ function landing(): void {
       <div class="hero-copy"><p class="eyebrow">A local desktop boundary for freelancers</p><h1 tabindex="-1">Keep client work from crossing over</h1>
         <p class="lede">For freelance developers who switch clients without mixing sources, accounts, or writing style.</p>
         <div class="hero-actions"><a class="button primary nav-link" href="/demo">Try it with sample data ${icon('arrow')}</a><span>See a checked client session next.</span></div>
-        <ul class="facts"><li>${icon('lock')} Client data stays on this device.</li><li>${icon('check')} Works without an account.</li><li><span aria-hidden="true">₹</span> Free for two workspaces. Pro is $19/month.</li></ul>
+        <ul class="facts"><li>${icon('lock')} Client data stays on this device.</li><li>${icon('check')} Works offline after your first visit.</li><li><span aria-hidden="true">₹</span> Free for two workspaces. Pro is $19/month.</li></ul>
       </div>
-      <figure class="hero-art"><div class="plate-label">BOUNDARY / 01</div><img src="/art/boundary-ledger.webp" width="1200" height="800" fetchpriority="high" alt="Two paper client folders sit on opposite sides of an orange divider."><figcaption>Separate briefs, source accounts, and rules before work begins.</figcaption></figure>
+      <figure class="hero-art"><div class="plate-label">BOUNDARY / 01</div><img src="/art/boundary-ledger.webp" srcset="/art/boundary-ledger-600.webp 600w, /art/boundary-ledger.webp 1200w" sizes="(max-width: 980px) 100vw, 50vw" width="1200" height="800" fetchpriority="high" decoding="async" alt="Two paper client folders sit on opposite sides of an orange divider."><figcaption>Separate briefs, source accounts, and rules before work begins.</figcaption></figure>
     </section>
     <section class="preview-section" aria-labelledby="preview-title"><div><p class="eyebrow">Live product preview</p><h2 id="preview-title">A check before the agent starts</h2><p>The active workspace names the only sources and accounts allowed in this session.</p></div>
       <div class="preview" role="img" aria-label="Northstar workspace with two allowed sources and three passed boundary checks">
         <div class="preview-tabs"><span>NS</span><span class="inactive">JL</span></div><div class="preview-sheet"><p class="stamp">NORTHSTAR / SESSION READY</p><h3>Sources in this session</h3><p>Git · northstar/reorder <b>dev@northstar.example</b></p><p>Drive · Wholesale briefs <b>sam@northstar.example</b></p><ol class="check-list"><li>Account matches workspace</li><li>No other client names found</li><li>Two redaction rules loaded</li></ol></div>
       </div>
     </section>
-    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">Set the boundary once</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p></li><li><span>02</span><h3>Scope each source</h3><p>Record the connector account allowed for this client.</p></li><li><span>03</span><h3>Check and export</h3><p>Run a preflight, then export a delivery record with the source list.</p></li></ol></section>
+    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">Set the boundary once</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="686" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and permitted accounts.</figcaption></figure></li><li><span>02</span><h3>Scope each source</h3><p>Record the connector account allowed for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="362" loading="lazy" decoding="async" alt="A session is blocked after three boundary checks fail."><figcaption>A wrong account or client name stops the session.</figcaption></figure></li><li><span>03</span><h3>Check and export</h3><p>Run a preflight, then export a delivery record with the source list.</p><figure><img src="/screens/03-pass.webp" width="760" height="362" loading="lazy" decoding="async" alt="A clean session passes all three boundary checks."><figcaption>A clean check creates a delivery record.</figcaption></figure></li></ol></section>
     <section class="limits" aria-labelledby="limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="limits-title">A guardrail, not surveillance</h2></div><div><p>It does not read other apps or monitor your screen.</p><p>It does not send source code to a hosted service.</p><p>It cannot prevent every copy and paste mistake. It checks the information you give it.</p></div></section>
-    <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install your local workspace</h2><p>Choose the signed-for-your-system package when releases are published. Current v0.1 builds are unsigned.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
-    <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">More clients, same local boundary</h2><p class="price"><strong>$19</strong> / month</p><p>Pro adds unlimited workspaces and reusable rule templates. Safety checks and delivery exports stay free.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Paste a license</button><p>Sociobot is the merchant of record. Manage refunds there.</p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
+    <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install your local workspace</h2><p>Choose the package for your system when releases are published. Current v0.1 builds are unsigned.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
+    <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">More clients, same local boundary</h2><p class="price"><strong>$19</strong> / month</p><p>Pro adds unlimited workspaces. Safety checks and delivery exports stay free.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Paste a license</button><p>Sociobot is the merchant of record. Manage refunds there.</p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
   </main>${footer()}`;
   wireShared();
   document.querySelector('#restore-license')?.addEventListener('click', showLicensePrompt);
@@ -65,7 +66,7 @@ async function loadDownload(): Promise<void> {
   const extensions = platform === 'macOS' ? ['.dmg'] : platform === 'Windows' ? ['.msi', '.exe'] : ['.AppImage', '.deb'];
   try {
     const cacheKey = 'ccf:release'; const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '{}');
-    const release = Date.now() - cached.savedAt < 3600000 ? cached.data : await fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then(response => { if (!response.ok) throw new Error('release unavailable'); return response.json(); });
+    const release = Date.now() - cached.savedAt < 3600000 ? cached.data : await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=1`).then(response => { if (!response.ok) throw new Error('release unavailable'); return response.json(); }).then(items => { if (!items[0]) throw new Error('release unavailable'); return items[0]; });
     localStorage.setItem(cacheKey, JSON.stringify({savedAt: Date.now(), data: release}));
     const asset = release.assets?.find((item: {name:string}) => extensions.some(ext => item.name.endsWith(ext)));
     if (!asset) throw new Error('asset unavailable');
@@ -83,7 +84,7 @@ function workspaceShell(): string {
   const active = state.workspaces.find(w => w.id === state.activeId) ?? state.workspaces[0];
   return `${header()}${demo ? demoBanner() : ''}<main id="main" class="workbench">
     <section class="app-heading"><div><p class="eyebrow">${demo ? 'Sample workspace' : 'Local workspace'}</p><h1 tabindex="-1">${active ? 'Check this client session' : 'Create your first client workspace'}</h1></div><div class="state-chip">${navigator.onLine ? 'Device local' : 'Offline · device local'}</div></section>
-    ${notice ? `<div class="notice" role="status">${escapeHtml(notice)}</div>` : ''}
+    ${notice ? `<div class="notice" role="status">${escapeHtml(notice)}${licenseNotice ? ' <a class="nav-link" href="/">Buy Pro</a>' : ''}</div>` : ''}
     ${active ? renderActive(active) : renderEmpty()}
   </main>${footer()}`;
 }
@@ -98,6 +99,7 @@ function renderActive(active: Workspace): string {
     <aside class="client-rail" aria-label="Client workspaces"><div class="rail-title">Clients <button id="new-workspace" aria-label="Create a workspace">+</button></div><div class="client-tabs" role="tablist" aria-label="Choose a client">${state.workspaces.map(w => `<button role="tab" aria-selected="${w.id === active.id}" data-workspace="${w.id}"><b>${escapeHtml(w.code)}</b><span>${escapeHtml(w.name)}</span></button>`).join('')}</div></aside>
     <section class="session-sheet" aria-labelledby="client-name"><div class="sheet-head"><div><p class="eyebrow">Active boundary</p><h2 id="client-name">${escapeHtml(active.name)}</h2></div><button class="text-button danger" id="delete-workspace">Delete workspace</button></div>
       <div class="brief-block"><h3>Client brief</h3><p>${escapeHtml(active.brief)}</p><h3>Writing rule</h3><p>${escapeHtml(active.voice)}</p></div>
+      <details class="boundary-editor"><summary>Edit the client boundary</summary><form id="boundary-form"><label class="field"><span>Client brief</span><textarea name="brief" required rows="3">${escapeHtml(active.brief)}</textarea></label><label class="field"><span>Writing rule</span><input name="voice" value="${escapeHtml(active.voice)}" required></label><button class="button secondary" type="submit">Save brief</button></form><form id="source-form"><h3>Add a source</h3><label class="field"><span>Source label</span><input name="label" required></label><label class="field"><span>Connector account</span><input name="account" required></label><label class="field"><span>Source type</span><select name="kind"><option>Git</option><option>Drive</option><option>Chat</option><option>Folder</option></select></label><button class="button secondary" type="submit">Add source</button></form><form id="rule-form"><h3>Add a redaction rule</h3><label class="field"><span>Text to find</span><input name="term" required></label><label class="field"><span>Replacement</span><input name="replacement" value="[REDACTED]" required></label><button class="button secondary" type="submit">Add rule</button></form></details>
       <form id="preflight-form"><fieldset><legend>Sources in this session</legend>${active.sources.map((s, index) => `<label class="source-row"><input type="checkbox" name="source" value="${s.id}" ${index === 0 ? 'checked' : ''}><span><b>${escapeHtml(s.kind)} · ${escapeHtml(s.label)}</b><small>Expected account: ${escapeHtml(s.account)}</small></span></label>`).join('')}</fieldset>
         <label class="field"><span>Active account</span><input name="account" value="${escapeHtml(active.sources[0]?.account ?? '')}" required><small>Enter the account your connector is using now.</small></label>
         <label class="field"><span>Text to check <small>(optional)</small></span><textarea name="draft" rows="4" placeholder="Paste a prompt or draft before it reaches your agent."></textarea></label>
@@ -117,6 +119,7 @@ async function renderWorkspace(): Promise<void> {
   demo = location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
   document.title = demo ? 'Demo — Client Context Firewall' : 'Workspace — Client Context Firewall';
   state = await loadState(demo);
+  notice = getStorageError() || notice;
   app.innerHTML = workspaceShell();
   wireShared(); wireWorkspace();
 }
@@ -140,6 +143,9 @@ function wireWorkspace(): void {
     state.workspaces = state.workspaces.filter(w => w.id !== active.id); state.sessions = state.sessions.filter(s => s.workspaceId !== active.id); state.activeId = state.workspaces[0]?.id ?? null; await saveState(state, demo); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
   });
   document.querySelector('#preflight-form')?.addEventListener('submit', runPreflight);
+  document.querySelector('#boundary-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.brief = String(data.get('brief')); active.voice = String(data.get('voice')); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Client brief saved.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
+  document.querySelector('#source-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.sources.push({id:uid(), label:String(data.get('label')), account:String(data.get('account')), kind:String(data.get('kind')) as 'Git'|'Drive'|'Chat'|'Folder'}); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Source added to this workspace.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
+  document.querySelector('#rule-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.rules.push({id:uid(), term:String(data.get('term')), replacement:String(data.get('replacement'))}); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Redaction rule added.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
   document.querySelector('#export-record')?.addEventListener('click', exportLatest);
   document.querySelector('#reset-demo')?.addEventListener('click', async () => { clearDemo(); notice = 'Demo reset to its original sample.'; await renderWorkspace(); });
 }
@@ -169,12 +175,13 @@ function exportLatest(): void {
 
 function legal(kind: 'privacy'|'terms'): void {
   const privacy = kind === 'privacy'; document.title = `${privacy ? 'Privacy' : 'Terms'} — Client Context Firewall`;
-  app.innerHTML = `${header()}<main id="main" class="legal"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>The web preview uses browser storage. Demo data uses a separate session-only key and is cleared when you reset it.</p><h2>What leaves your device</h2><p>Workspace data is not sent to us. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app. Export a delivery record before offboarding if you need an audit trail.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 per month. It adds unlimited workspaces and reusable rule templates. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded, expired, or revoked license stops Pro features. Your free workspaces and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
+  app.innerHTML = `${header()}<main id="main" class="legal"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>The web preview uses browser storage. Demo data uses a separate session-only key and is cleared when you reset it.</p><h2>What leaves your device</h2><p>Workspace data is not sent to us. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app. Export a delivery record before offboarding if you need an audit trail.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 per month. It adds unlimited workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded, expired, or revoked license stops Pro features. Your free workspaces and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
 }
 
 function notFound(): void { document.title = 'Page not found — Client Context Firewall'; app.innerHTML = `${header()}<main id="main" class="not-found"><p class="huge">404</p><h1 tabindex="-1">This page crossed the wrong boundary</h1><p>The address does not match a page in this workspace.</p><a class="button primary nav-link" href="/">Return home</a></main>${footer()}`; wireShared(); }
 
 function wireShared(): void {
+  document.querySelector('.demo-banner a[href="/app"]')?.addEventListener('click', clearDemo);
   document.querySelectorAll<HTMLAnchorElement>('a.nav-link').forEach(link => link.addEventListener('click', event => { const url = new URL(link.href); if (url.origin !== location.origin) return; event.preventDefault(); navigate(url.pathname); }));
 }
 
@@ -194,16 +201,18 @@ async function verifyLicense(token: string, force = false): Promise<boolean> {
   try { const response = await fetch(`${BILLING}/verify?license=${encodeURIComponent(token)}`); const result = await response.json(); localStorage.setItem(cacheKey, JSON.stringify({valid: result.valid === true, checkedAt: Date.now()})); return result.valid === true; } catch { return licenseActive(); }
 }
 
-async function acceptReturnedLicense(): Promise<void> {
+function acceptReturnedLicense(): void {
   const url = new URL(location.href); const token = url.searchParams.get('license'); if (!token) return;
-  localStorage.setItem('sb_license:freelancer-agent-context', token); url.searchParams.delete('license'); history.replaceState({}, '', `${url.pathname}${url.search}`); await verifyLicense(token, true);
+  localStorage.setItem('sb_license:freelancer-agent-context', token); url.searchParams.delete('license'); history.replaceState({}, '', `${url.pathname}${url.search}`); void verifyLicense(token, true);
 }
 
 async function route(): Promise<void> {
-  await acceptReturnedLicense(); window.scrollTo(0,0);
+  acceptReturnedLicense(); window.scrollTo(0,0);
   const path = location.pathname.replace(/\/$/, '') || '/';
   if ('__TAURI_INTERNALS__' in window && path === '/') await renderWorkspace(); else if (path === '/') landing(); else if (path === '/demo' || path === '/app') await renderWorkspace(); else if (path === '/privacy' || path === '/terms') legal(path.slice(1) as 'privacy'|'terms'); else notFound();
   const h1 = document.querySelector<HTMLElement>('h1'); if (h1) { status.textContent = h1.textContent ?? ''; requestAnimationFrame(() => h1.focus({preventScroll:true})); }
+  const savedLicense = localStorage.getItem('sb_license:freelancer-agent-context');
+  if (savedLicense) void verifyLicense(savedLicense).then(valid => { if (!valid && location.pathname === '/app') { licenseNotice = true; notice = 'License no longer active.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); } });
 }
 
 window.addEventListener('popstate', route);

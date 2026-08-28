@@ -24,12 +24,22 @@ fn vault_key() -> Result<[u8; 32], String> {
     Ok(key)
 }
 
+fn encrypt(contents: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
+    let cipher = Aes256Gcm::new_from_slice(key).map_err(|error| error.to_string())?;
+    let mut nonce_bytes = [0u8; 12]; OsRng.fill_bytes(&mut nonce_bytes);
+    let encrypted = cipher.encrypt(Nonce::from_slice(&nonce_bytes), contents).map_err(|error| error.to_string())?;
+    let mut output = nonce_bytes.to_vec(); output.extend(encrypted); Ok(output)
+}
+
+fn decrypt(encrypted: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
+    if encrypted.len() < 13 { return Err("The local vault is damaged.".into()); }
+    let cipher = Aes256Gcm::new_from_slice(key).map_err(|error| error.to_string())?;
+    cipher.decrypt(Nonce::from_slice(&encrypted[..12]), &encrypted[12..]).map_err(|_| "The local vault could not be opened with this device key.".to_string())
+}
+
 #[tauri::command]
 fn save_vault(app: AppHandle, contents: String) -> Result<(), String> {
-    let key = vault_key()?; let cipher = Aes256Gcm::new_from_slice(&key).map_err(|error| error.to_string())?;
-    let mut nonce_bytes = [0u8; 12]; OsRng.fill_bytes(&mut nonce_bytes);
-    let encrypted = cipher.encrypt(Nonce::from_slice(&nonce_bytes), contents.as_bytes()).map_err(|error| error.to_string())?;
-    let mut output = nonce_bytes.to_vec(); output.extend(encrypted);
+    let output = encrypt(contents.as_bytes(), &vault_key()?)?;
     fs::write(vault_path(&app)?, output).map_err(|error| error.to_string())
 }
 
@@ -37,9 +47,7 @@ fn save_vault(app: AppHandle, contents: String) -> Result<(), String> {
 fn load_vault(app: AppHandle) -> Result<Option<String>, String> {
     let path = vault_path(&app)?; if !path.exists() { return Ok(None); }
     let encrypted = fs::read(path).map_err(|error| error.to_string())?;
-    if encrypted.len() < 13 { return Err("The local vault is damaged.".into()); }
-    let key = vault_key()?; let cipher = Aes256Gcm::new_from_slice(&key).map_err(|error| error.to_string())?;
-    let plain = cipher.decrypt(Nonce::from_slice(&encrypted[..12]), &encrypted[12..]).map_err(|_| "The local vault could not be opened with this device key.".to_string())?;
+    let plain = decrypt(&encrypted, &vault_key()?)?;
     String::from_utf8(plain).map(Some).map_err(|error| error.to_string())
 }
 
@@ -56,4 +64,18 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![save_vault, load_vault, delete_vault])
         .run(tauri::generate_context!())
         .expect("error while running Client Context Firewall");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{decrypt, encrypt};
+
+    #[test]
+    fn encrypted_vault_round_trips_and_rejects_another_key() {
+        let key = [7u8; 32]; let other_key = [8u8; 32];
+        let encrypted = encrypt(br#"{\"client\":\"Northstar\"}"#, &key).unwrap();
+        assert_ne!(&encrypted[12..], br#"{\"client\":\"Northstar\"}"#);
+        assert_eq!(decrypt(&encrypted, &key).unwrap(), br#"{\"client\":\"Northstar\"}"#);
+        assert!(decrypt(&encrypted, &other_key).is_err());
+    }
 }
