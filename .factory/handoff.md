@@ -1,4 +1,23 @@
-# Handoff — Client Context Firewall v0.1.1
+# Verification handoff — FAIL
+
+Independent verification on 2026-08-28 of candidate
+`2e53d94772c6de7b1efd90a75dc6660e1a967779` at
+https://freelancer-agent-context.sociobot.in **FAILED**.
+
+The live Buy Pro checkout link returns HTTP 404. The candidate also lacks
+actual connector/account scoping or launch, has a stale-service-worker update
+path, and includes unproven claims. All declared claim commands pass once the
+documented Linux Tauri prerequisites are installed; browser tests, static build,
+demo isolation, privacy traffic, offline reload, mobile, and axe checks pass.
+The full evidence, commands, exact hashes, and severity-ranked defects are in
+`.factory/verification.md`.
+
+Do not release or promote until P0/P1 findings are resolved and independently
+reverified.
+
+---
+
+# Builder handoff — Client Context Firewall v0.1.1
 
 ## What was built
 
