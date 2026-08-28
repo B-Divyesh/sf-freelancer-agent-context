@@ -3,12 +3,18 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      manifest_only:
+        description: Rebuild checksums for the current package version
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
   build:
+    if: github.event_name != 'workflow_dispatch' || inputs.manifest_only != true
     strategy:
       fail-fast: false
       matrix:
@@ -48,18 +54,23 @@ jobs:
 
   checksums:
     needs: build
+    if: always() && (needs.build.result == 'success' || inputs.manifest_only == true)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Download release assets
         env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-        run: gh release download "${GITHUB_REF_NAME}" --repo "$GITHUB_REPOSITORY" --dir release
+        run: |
+          release_tag="v$(node -p \"require('./package.json').version\")"
+          gh release download "$release_tag" --repo "$GITHUB_REPOSITORY" --dir release
       - name: Write checksums and manifest
         run: |
           cd release
           sha256sum * > SHA256SUMS
+          export VERSION="$(node -p \"require('../package.json').version\")"
           python3 - <<'PY'
           import json, os
-          repo=os.environ['GITHUB_REPOSITORY']; version=os.environ['GITHUB_REF_NAME']
+          repo=os.environ['GITHUB_REPOSITORY']; version='v'+os.environ['VERSION']
           files=[f for f in os.listdir('.') if f not in ('SHA256SUMS','latest.json')]
           platforms={
             'mac': [f for f in files if f.endswith('.dmg')],
@@ -71,4 +82,6 @@ jobs:
           PY
       - name: Upload manifests
         env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-        run: gh release upload "${GITHUB_REF_NAME}" release/SHA256SUMS release/latest.json --repo "$GITHUB_REPOSITORY" --clobber
+        run: |
+          release_tag="v$(node -p \"require('./package.json').version\")"
+          gh release upload "$release_tag" release/SHA256SUMS release/latest.json --repo "$GITHUB_REPOSITORY" --clobber
