@@ -1,0 +1,32 @@
+Clean clone: /tmp/ccf-final-verify-CRWfOD
+Remote commit: 88d4aa032e0178a3e3cdced49700c3b3a82a0879
+Install: npm ci — PASS
+
+Every command in .factory/claims.json was run separately from that clone.
+Each selector executed exactly one test and passed:
+
+PASS demo-isolation
+PASS boundary-check
+PASS scoped-launch
+PASS provenance-export
+PASS validated-provenance
+PASS device-local
+PASS offline-reload
+PASS offline-update
+PASS plan-limit
+PASS free-core
+PASS paid-checkout
+PASS license-verification
+PASS license-portability
+PASS revoked-license
+PASS encrypted-vault
+PASS platform-install
+PASS workspace-deletion
+PASS workspace-backup
+PASS art-provenance
+PASS refund-route
+PASS release-request-disclosure
+PASS hosting-routes
+PASS site-build-output
+
+Result: 23/23 PASS.

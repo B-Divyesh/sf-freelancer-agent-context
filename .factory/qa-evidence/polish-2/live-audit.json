@@ -1,0 +1,161 @@
+{
+  "generatedAt": "2026-08-29T11:07:42.453Z",
+  "base": "https://freelancer-agent-context.sociobot.in",
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Client Context Firewall — Keep client work apart",
+      "lang": "en",
+      "h1": [
+        "Keep client work from crossing over"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/",
+      "description": "Keep each client’s sources, rules, and delivery record in one local workspace.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "title": "Demo — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "Check this client session"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/demo",
+      "description": "Try a sample client workspace. Sample changes stay in this tab.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/app",
+      "status": 200,
+      "title": "Workspace — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "Create your first client workspace"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/app",
+      "description": "Create and check local client workspaces in the browser preview.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "title": "Privacy — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "Your client data stays under your control"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/privacy",
+      "description": "Learn what Client Context Firewall stores and where workspace data goes.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "Terms for using the client boundary"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/terms",
+      "description": "Read the Client Context Firewall purchase and use terms.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/art-provenance",
+      "status": 200,
+      "title": "Art provenance — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "Original art for this product"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/art-provenance",
+      "description": "Read how the original Client Context Firewall artwork was made.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    },
+    {
+      "path": "/missing-page",
+      "status": 404,
+      "title": "Page not found — Client Context Firewall",
+      "lang": "en",
+      "h1": [
+        "This page was not found"
+      ],
+      "main": true,
+      "canonical": "https://freelancer-agent-context.sociobot.in/404",
+      "description": "This Client Context Firewall page was not found. Return home or open the demo.",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": [],
+      "seriousOrCriticalAxe": [],
+      "externalLinksWithoutLabel": []
+    }
+  ],
+  "demo": {
+    "entered": {
+      "url": "https://freelancer-agent-context.sociobot.in/?demo=1",
+      "banner": "DemoSample data. Nothing is saved.Reset demoStart for real",
+      "realSentinel": "preserved",
+      "demoKeys": []
+    },
+    "reset": {
+      "realSentinel": "preserved",
+      "demoKeys": []
+    },
+    "startedReal": {
+      "url": "https://freelancer-agent-context.sociobot.in/app",
+      "realSentinel": "preserved",
+      "demoKeys": []
+    },
+    "consoleErrors": [],
+    "crossOriginRequests": []
+  },
+  "mobile": {
+    "h1": "Keep client work from crossing over",
+    "action": "Try it with sample data",
+    "facts": [
+      "Browser workspaces stay on this device.",
+      "Works offline after your first visit.",
+      "$ Free for two workspaces. Pro is $19 once."
+    ],
+    "viewportWidth": 390,
+    "documentWidth": 390
+  },
+  "offline": {
+    "h1": "Check this client session",
+    "status": "Offline · device local"
+  },
+  "textResize": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "h1Visible": true,
+    "resetVisible": true,
+    "startVisible": true
+  }
+}
