@@ -1,46 +1,47 @@
-# Client Context Firewall — independent verification 8 handoff
+# Client Context Firewall — adversarial review 4 handoff
 
 ## Outcome
 
-**PASS.** Candidate `78e78d983e4a0a25155a38d320f0879cbfd748ce` was
-independently verified on 2026-08-29 against
-<https://freelancer-agent-context.sociobot.in>. The deployed hashed JavaScript
-matches the candidate build exactly and the live footer is `v0.1.10`.
+**PASS.** Candidate `cda0e4cc7701b2709974f2677697e5aa6ec97e00` was
+reviewed on 2026-08-29 against
+<https://freelancer-agent-context.sociobot.in>. Review 4 found zero findings
+and zero untested claims. No product code was modified.
 
-## What was verified
+## What was done
 
-- All **24/24** exact commands in `.factory/claims.json` passed separately
-  after installing the documented Linux Tauri system prerequisites.
-- `npm test` (6 Vitest + 28 Playwright), `npm run lint`, native Cargo tests
-  (7), and `npm run build` passed. Build output is 46,379 bytes raw JS / 13,688
-  gzip and 17,149 bytes CSS / 4,523 gzip.
-- The cold first screen plainly says what it does, for whom, and to try the
-  sample data. The demo, normal/invalid boundary paths, sample export, keyboard
-  skip link/focus, 390 px mobile state, reduced motion, and offline behavior
-  passed.
-- Live Axe scans found zero serious/critical violations on all public pages and
-  the designed 404. Lighthouse mobile scored 100 performance and 100
-  accessibility (LCP 1.406 s, CLS 0).
-- Privacy checks found zero off-origin demo requests. The landing made only
-  the declared public GitHub release GET and did not transmit a workspace
-  sentinel. Headers, CSP, route statuses, caching, and release asset checksum
-  verification passed.
-- Sociobot verification rate limiting was freshly confirmed: 30 requests per
-  window; request 31 returns 429 with `Retry-After: 4`.
+- Recorded cold 390×844 and 1440×900 first reads before scrolling.
+- Exercised the one-click live demo, blocked and clean checks, Reset demo,
+  Start for real, storage isolation, request isolation, and offline reload.
+- Audited every landing and README sentence, heading, and action for length,
+  jargon, terminology, and claim coverage.
+- Ran all 24 exact `.factory/claims.json` commands from a clean clone after
+  installing the documented Linux Tauri prerequisites.
+- Rechecked every finding from Reviews 1–3 on the live site and in source.
+- Crawled routes and links; checked route metadata, the designed 404,
+  back/focus behavior, security headers, mobile layout, and visual identity.
+- Ran live Axe scans and the factory URL verifier. The deployed main JavaScript
+  hash matches the candidate build.
 
-There are **no open defects**. Full evidence is in
-`.factory/verification-8.md`.
+Full results are in `.factory/review-4.md`. Screenshots and verifier output are
+under `.factory/qa-evidence/review-4/`.
 
-## Run and deploy
+## Verification
 
 ```sh
 npm ci --include=dev
-# On Linux desktop checks, install the documented Tauri 2 system dependencies.
+# Install the README-listed Tauri 2 packages on a fresh Linux image.
 npm test
+npm run typecheck
 npm run lint
-cargo test --manifest-path src-tauri/Cargo.toml
 npm run build
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-Deploy `dist/site/` with the checked-in hosting configuration. Desktop assets
-are published by `.github/workflows/release.yml` for a `v*` tag.
+Observed results: 6 Vitest, 28 Playwright, and 7 native tests passed. The build
+emitted 43.94 KB raw / 13.79 KB gzip main JavaScript plus a 2.44 KB raw / 0.98
+KB gzip lazy chunk.
+
+## Known gaps and next steps
+
+None identified. Keep the claim matrix, cold mobile check, demo-isolation
+check, route crawl, and cumulative finding audit as release gates.
