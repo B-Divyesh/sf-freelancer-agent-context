@@ -1,52 +1,83 @@
-# Client Context Firewall — review 3 handoff
+# Client Context Firewall — polish round 3 handoff
 
 ## Outcome
 
-**FAIL** for candidate `884873ad910e0b988defa255e03ac2ca1b92c951`.
-The complete adversarial report is `.factory/review-3.md`. No product code was
-changed.
+**PASS.** The repair of candidate
+`884873ad910e0b988defa255e03ac2ca1b92c951` is committed as
+`074aa0238967d3c7a21a1ad57cf792ae8e2caf8e`, released as `v0.1.10`, pushed to
+`main`, and deployed to
+<https://freelancer-agent-context.sociobot.in>.
 
-The cold first screen and one-click demo pass. All 23 declared claim commands
-pass from a fresh remote clone after installing the documented Tauri Linux
-prerequisites. The aggregate 6 Vitest and 27 Playwright tests, typecheck, lint,
-and production build also pass. Live route metadata, the designed 404,
-same-origin demo traffic, offline reload, focus/history behavior, link
-availability, and Axe serious/critical checks pass.
+Round 3 closes all five current findings and re-verifies every earlier review
+finding. The complete id-to-change-to-evidence map is
+`.factory/polish-3.md`; there are no remaining product findings or known
+product gaps.
 
-## Remaining findings
+## What changed
 
-- **F-3-1, blocking:** README/Privacy imply the session context is temporary,
-  but the native file remains in the client profile until workspace deletion
-  and no claim tests its lifecycle.
-- **F-3-2, blocking:** README says backups omit license data and delivery
-  records, but the listed backup claim and test cover only sign-in omission and
-  folder-path confirmation.
-- **F-3-3, blocking:** the credential-manager claim test uses
-  `keyring::mock::default_credential_builder()` rather than an operating-system
-  credential store.
-- **F-3-4, minor:** the Privacy H1 is an absolute, unlisted claim instead of a
-  page-identifying heading.
-- **F-3-5, minor:** the GitHub download and Sociobot checkout actions do not
-  identify their external destinations.
+- Corrected the checked-context lifecycle: README and Privacy now state that
+  the checked context remains in its client profile until workspace deletion.
+  The new `session-context-retention` claim verifies both retention and
+  deletion.
+- Strengthened the workspace-backup claim and browser test to seed and prove
+  the absence of agent sign-ins, license token/verdict data, and delivery
+  records, as well as required path review before import.
+- Removed the unsupported operating-system credential-manager assertion. The
+  remaining, public AES-256-GCM file-encryption statement has a real
+  write/read/no-plaintext/wrong-key test.
+- Replaced the Privacy H1 with the page-identifying
+  “Privacy: what the app stores and sends.”
+- Made all GitHub-download and Sociobot-checkout actions name their external
+  destination in visible and accessible text; added a browser regression.
+- Bumped the desktop/site release to `0.1.10`, including cache and footer
+  versioning, and fixed the Linux release runner’s GTK prerequisite.
 
 ## Verification
 
-From a clean clone:
+From a fresh remote clone at the repair commit (the worker requires
+`npm ci --include=dev` because its default npm configuration omits test tools):
+
+- Every exact command in `.factory/claims.json` passed separately: **24/24**.
+- `npm test` passed: **6 Vitest** and **28 Playwright** tests.
+- `npm run lint` passed: TypeScript, Rust format, and Clippy with warnings
+  denied.
+- `cargo test --manifest-path src-tauri/Cargo.toml` passed: **7** native tests.
+- `npm run build` passed and produced `dist/site`; emitted JavaScript is
+  **46.38 KB raw / 14.77 KB gzip**.
+
+The durable clean-clone record is
+`.factory/qa-evidence/polish-3/clean-claim-summary.txt`.
+
+Live deployment checks:
+
+- The factory URL verifier passed for the production URL: HTTPS 200, title,
+  language, one H1, `main`, alt text, control labels, and zero application
+  console errors. Evidence:
+  `.factory/qa-evidence/polish-3/live/verify.json`.
+- Direct live routes `/`, `/demo`, `/app`, `/privacy`, `/terms`, and
+  `/art-provenance` return 200. An unknown route returns the designed 404.
+- Live Playwright Axe checks found zero serious/critical issues on every route
+  above plus the 404. Cold desktop/mobile and demo screenshots are in
+  `.factory/qa-evidence/polish-3/live/`.
+- Mobile Lighthouse: performance **100**, accessibility **100**, LCP **1.47
+  s**, CLS **0**. Evidence:
+  `.factory/qa-evidence/polish-3/live/lighthouse-mobile.json`.
+- GitHub Actions release run succeeded:
+  <https://github.com/B-Divyesh/sf-freelancer-agent-context/actions/runs/33258677032>.
+  Release assets include macOS Intel/Apple silicon, Windows MSI/EXE, Linux
+  AppImage/DEB/RPM, `SHA256SUMS`, and `latest.json`; a downloaded Linux DEB
+  passed `sha256sum -c`.
+
+## Run and deploy
 
 ```sh
-npm ci
+npm ci --include=dev
 npm test
-npm run typecheck
 npm run lint
+cargo test --manifest-path src-tauri/Cargo.toml
 npm run build
 ```
 
-Every exact command in `.factory/claims.json` was also run separately. The
-four Rust claim commands require GTK/WebKit/Tauri development packages on
-Linux; after those prerequisites were installed, all four passed unchanged.
-
-Live checks used fresh Chromium contexts at 390×844 and 1440×900. The factory
-URL verifier passed against
-<https://freelancer-agent-context.sociobot.in>, and live Axe checks reported no
-serious or critical violations on `/`, `/demo`, `/app`, `/privacy`, `/terms`,
-`/art-provenance`, or the designed 404.
+Deploy the generated `dist/site/` static root with the checked-in hosting
+configuration. Desktop release builds run from `.github/workflows/release.yml`
+when a `v*` tag is pushed.

@@ -1,0 +1,21 @@
+Polish round 3 clean-clone verification
+======================================
+
+Commit under test: 074aa0238967d3c7a21a1ad57cf792ae8e2caf8e
+Clone: https://github.com/B-Divyesh/sf-freelancer-agent-context.git
+Bootstrap: npm ci --include=dev
+
+Every exact command declared in .factory/claims.json passed separately: 24/24.
+This includes the new session-context-retention claim, strengthened
+workspace-backup claim, and renamed encrypted-vault claim.
+
+Full clean-clone suite passed:
+- npm test: 6 Vitest tests and 28 Playwright tests
+- npm run lint: typecheck, cargo fmt --check, and cargo clippy -D warnings
+- cargo test --manifest-path src-tauri/Cargo.toml: 7 native tests
+- npm run build: dist/site created; emitted JavaScript is 46.38 KB raw
+  (14.77 KB gzip)
+
+The disposable worker defaults npm ci to production-only dependencies, so the
+explicit --include=dev flag is required for its test tooling. It does not alter
+the product lockfile or runtime dependency set.
