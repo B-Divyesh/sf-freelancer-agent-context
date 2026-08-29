@@ -353,7 +353,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.8']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.9']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);

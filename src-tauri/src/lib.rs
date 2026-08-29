@@ -943,39 +943,21 @@ mod tests {
         fs::create_dir_all(&base).unwrap();
         let status = base.join("launch.status");
 
-        #[cfg(windows)]
-        let mut missing_child = Command::new("cmd")
-            .args(["/C", "exit", "0"])
-            .spawn()
-            .unwrap();
-        #[cfg(not(windows))]
-        let mut missing_child = Command::new("/bin/true").spawn().unwrap();
+        let mut missing_child = completed_test_child();
         let missing =
             wait_for_launch_confirmation(&status, &mut missing_child, Duration::from_millis(1))
                 .unwrap_err();
         assert!(missing.contains("did not confirm startup"));
 
         fs::write(&status, "failed: connector stopped immediately\n").unwrap();
-        #[cfg(windows)]
-        let mut failed_child = Command::new("cmd")
-            .args(["/C", "exit", "0"])
-            .spawn()
-            .unwrap();
-        #[cfg(not(windows))]
-        let mut failed_child = Command::new("/bin/true").spawn().unwrap();
+        let mut failed_child = completed_test_child();
         let failed =
             wait_for_launch_confirmation(&status, &mut failed_child, Duration::from_millis(1))
                 .unwrap_err();
         assert!(failed.contains("connector stopped immediately"));
 
         fs::write(&status, "started\n").unwrap();
-        #[cfg(windows)]
-        let mut started_child = Command::new("cmd")
-            .args(["/C", "exit", "0"])
-            .spawn()
-            .unwrap();
-        #[cfg(not(windows))]
-        let mut started_child = Command::new("/bin/true").spawn().unwrap();
+        let mut started_child = completed_test_child();
         assert!(wait_for_launch_confirmation(
             &status,
             &mut started_child,
@@ -984,6 +966,24 @@ mod tests {
         .is_ok());
 
         fs::remove_dir_all(base).unwrap();
+    }
+
+    /// The standard utility locations differ on macOS runners (`/usr/bin`) and
+    /// Linux runners (`/bin`). Keep the confirmation regression runnable in
+    /// every release job rather than treating a platform-specific path as a
+    /// launch failure.
+    fn completed_test_child() -> std::process::Child {
+        #[cfg(windows)]
+        return Command::new("cmd")
+            .args(["/C", "exit", "0"])
+            .spawn()
+            .unwrap();
+
+        #[cfg(target_os = "macos")]
+        return Command::new("/usr/bin/true").spawn().unwrap();
+
+        #[cfg(all(unix, not(target_os = "macos")))]
+        return Command::new("/bin/true").spawn().unwrap();
     }
 
     #[cfg(unix)]

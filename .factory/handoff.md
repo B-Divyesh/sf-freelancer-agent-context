@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The release-blocking P1 in verifier report `.factory/verification-6.md` is repaired in version `0.1.8`.
+The release-blocking P1 in verifier report `.factory/verification-6.md` is repaired in version `0.1.9`.
 
 The desktop app no longer treats a spawned terminal wrapper as proof that an agent opened. It resolves the selected connector to an executable path, starts it through the isolated client profile, and waits for a private startup result. The result is written only after the connector remains live for one second. A missing or non-executable connector, an immediately failing connector, a failing terminal wrapper, or no acknowledgement returns a native error. The frontend additionally requires `confirmed: true` before it writes a launch to a delivery record, so export remains unavailable after every failed path.
 
@@ -44,14 +44,14 @@ Static/browser checks:
 - `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173` passed: HTTP 200, title, `lang=en`, one H1, main landmark, no missing image alt text, no unnamed buttons, and no console errors.
 - The shipped Playwright Axe integration passed all public routes in light and dark themes with zero serious or critical violations. The standalone Axe CLI could not locate a system Chrome binary in this container; the project’s pinned Playwright Chromium integration is the verified accessibility runner.
 - Lighthouse against the production build with pinned Chromium: performance 100, accessibility 100, best practices 100, SEO 100; LCP 0.5 s and CLS 0. The 390 px Playwright check passed with no horizontal overflow; keyboard tests cover the skip link, dialog, focus, and reduced motion.
-- Production output is 46,100 bytes JavaScript raw (14,770 bytes gzip) and 17,150 bytes CSS raw (4,515 bytes gzip), below the product budgets.
+- Production output is 46,102 bytes JavaScript raw (14,770 bytes gzip) and 17,149 bytes CSS raw (4,513 bytes gzip), below the product budgets.
 
 Linux package smoke:
 
 ```text
-APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a <0.1.8 AppImage>
+APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a <0.1.9 AppImage>
 PASS: native window remained live for 12 seconds under Xvfb
-DEB metadata: client-context-firewall 0.1.8 amd64
+DEB metadata: client-context-firewall 0.1.9 amd64
 ```
 
 Local package SHA-256 values:

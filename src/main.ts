@@ -38,7 +38,7 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Keep each client’s work in its own workspace.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a class="nav-link" href="/art-provenance">Art provenance</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.8</p></footer>`;
+  return `<footer><p>Keep each client’s work in its own workspace.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a class="nav-link" href="/art-provenance">Art provenance</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.9</p></footer>`;
 }
 
 function setMeta(title: string, description: string, path: string): void {
