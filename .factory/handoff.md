@@ -5,6 +5,9 @@
 Repaired every finding in `.factory/review-1.md` for Client Context Firewall
 v0.1.5. The distinct dithered boundary-ledger visual system remains intact.
 
+Repair commit: `6e32af5c245310e8ac3b868dc855c69a47c3e9e4` (tag `v0.1.5`).
+Evidence commit: `e5bf0c5`.
+
 ## Delivered
 
 - First screen now uses plain job language; headings, labels, terminology, README, and legal copy were rewritten.
