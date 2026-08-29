@@ -1,0 +1,949 @@
+{
+  "firstRead": {
+    "mobile": {
+      "status": 200,
+      "title": "Client Context Firewall — Keep client work apart",
+      "h1": "Keep client work from crossing over",
+      "lede": "For freelance developers who switch clients without mixing sources, accounts, or writing style.",
+      "primary": "Try it with sample data",
+      "adjacent": "See a checked client session next.",
+      "facts": [
+        "Browser workspaces stay on this device.",
+        "Works offline after your first visit.",
+        "$ Free for two workspaces. Pro is $19 once."
+      ],
+      "visibleText": "Skip to main content\nCF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY\n\nA LOCAL DESKTOP BOUNDARY FOR FREELANCERS\n\nKeep client work from crossing over\n\nFor freelance developers who switch clients without mixing sources, accounts, or writing style.\n\nTRY IT WITH SAMPLE DATA\nSee a checked client session next.\nBrowser workspaces stay on this device.\nWorks offline after your first visit.\n$\nFree for two workspaces. Pro is $19 once.\nTwo client folders kept separate\nSeparate briefs, source accounts, and rules before work begins.\n\nLIVE PRODUCT PREVIEW\n\nPreview a checked client session\n\nThe desktop app opens each agent with a separate client profile: one sign-in and settings folder for that client.\n\nNS\nJL\n\nNORTHSTAR / SESSION READY\n\nSources in this session\n\nCodex · northstar/reorder\nclient profile\n\nClaude · Wholesale briefs\nclient profile\n\nClient profile is separate\nNo other client names found\nTwo redaction rules loaded\n\nHOW IT WORKS\n\nHow the client check works\n01\nName the workspace\n\nAdd the brief and writing rules that belong to one client.\n\nStart with the client brief and source folders.\n02\nScope each source\n\nChoose a local folder and agent for this client.\n\nAnother client name or redaction term stops the session.\n03\nLaunch and export\n\nOpen every selected agent in its client profile, then export the delivery record.\n\nValidated launch receipts enable a verified delivery record.\n\nCLEAR LIMITS\n\nWhat the app checks\n\nThe desktop app separates each client’s agent credentials and settings in a client profile.\n\nYour chosen agent may use its own online service.\n\nThe text check catches named clients and redaction terms before launch.\n\nDESKTOP APP\n\nInstall the desktop app\n\nChoose the package for your system when releases are published.\n\nChecking the latest release…\n\nPRO LICENSE\n\nPro pricing\n\n$19 once\n\nPro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.\n\nBUY PRO\nRESTORE PRO LICENSE\n\nCheckout is handled by Sociobot.\n\nRequest a refund from Sociobot\n\nRead purchase terms\n\nKeep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5\n\nKeep client work from crossing over",
+      "scrollY": 0,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "heroRect": {
+        "top": 76,
+        "bottom": 1216.25,
+        "height": 1140.25
+      },
+      "h1Rect": {
+        "top": 174.5,
+        "bottom": 363.8125,
+        "height": 189.3125
+      },
+      "actionRect": {
+        "top": 505.359375,
+        "bottom": 617.859375,
+        "height": 112.5
+      },
+      "factsRect": {
+        "top": 649.859375,
+        "bottom": 742.25,
+        "height": 92.390625
+      },
+      "requests": [
+        "https://freelancer-agent-context.sociobot.in/",
+        "https://freelancer-agent-context.sociobot.in/assets/index-BqPgBQ2Y.js",
+        "https://freelancer-agent-context.sociobot.in/assets/index-DLMKDkWZ.css",
+        "https://freelancer-agent-context.sociobot.in/art/boundary-ledger-600.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/01-scope.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/02-block.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/03-pass.webp"
+      ],
+      "consoleErrors": []
+    },
+    "desktop": {
+      "status": 200,
+      "title": "Client Context Firewall — Keep client work apart",
+      "h1": "Keep client work from crossing over",
+      "lede": "For freelance developers who switch clients without mixing sources, accounts, or writing style.",
+      "primary": "Try it with sample data",
+      "adjacent": "See a checked client session next.",
+      "facts": [
+        "Browser workspaces stay on this device.",
+        "Works offline after your first visit.",
+        "$ Free for two workspaces. Pro is $19 once."
+      ],
+      "visibleText": "Skip to main content\nCF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY\n\nA LOCAL DESKTOP BOUNDARY FOR FREELANCERS\n\nKeep client work from crossing over\n\nFor freelance developers who switch clients without mixing sources, accounts, or writing style.\n\nTRY IT WITH SAMPLE DATA\nSee a checked client session next.\nBrowser workspaces stay on this device.\nWorks offline after your first visit.\n$\nFree for two workspaces. Pro is $19 once.\nTwo client folders kept separate\nSeparate briefs, source accounts, and rules before work begins.\n\nLIVE PRODUCT PREVIEW\n\nPreview a checked client session\n\nThe desktop app opens each agent with a separate client profile: one sign-in and settings folder for that client.\n\nNS\nJL\n\nNORTHSTAR / SESSION READY\n\nSources in this session\n\nCodex · northstar/reorder\nclient profile\n\nClaude · Wholesale briefs\nclient profile\n\nClient profile is separate\nNo other client names found\nTwo redaction rules loaded\n\nHOW IT WORKS\n\nHow the client check works\n01\nName the workspace\n\nAdd the brief and writing rules that belong to one client.\n\nStart with the client brief and source folders.\n02\nScope each source\n\nChoose a local folder and agent for this client.\n\nAnother client name or redaction term stops the session.\n03\nLaunch and export\n\nOpen every selected agent in its client profile, then export the delivery record.\n\nValidated launch receipts enable a verified delivery record.\n\nCLEAR LIMITS\n\nWhat the app checks\n\nThe desktop app separates each client’s agent credentials and settings in a client profile.\n\nYour chosen agent may use its own online service.\n\nThe text check catches named clients and redaction terms before launch.\n\nDESKTOP APP\n\nInstall the desktop app\n\nChoose the package for your system when releases are published.\n\nChecking the latest release…\n\nPRO LICENSE\n\nPro pricing\n\n$19 once\n\nPro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.\n\nBUY PRO\nRESTORE PRO LICENSE\n\nCheckout is handled by Sociobot.\n\nRequest a refund from Sociobot\n\nRead purchase terms\n\nKeep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5\n\nKeep client work from crossing over",
+      "scrollY": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "heroRect": {
+        "top": 76,
+        "bottom": 1011.109375,
+        "height": 935.109375
+      },
+      "h1Rect": {
+        "top": 218.25,
+        "bottom": 596.8125,
+        "height": 378.5625
+      },
+      "actionRect": {
+        "top": 724.71875,
+        "bottom": 772.71875,
+        "height": 48
+      },
+      "factsRect": {
+        "top": 804.71875,
+        "bottom": 897.109375,
+        "height": 92.390625
+      },
+      "requests": [
+        "https://freelancer-agent-context.sociobot.in/",
+        "https://freelancer-agent-context.sociobot.in/assets/index-BqPgBQ2Y.js",
+        "https://freelancer-agent-context.sociobot.in/assets/index-DLMKDkWZ.css",
+        "https://freelancer-agent-context.sociobot.in/art/boundary-ledger.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/01-scope.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/02-block.webp",
+        "https://freelancer-agent-context.sociobot.in/screens/03-pass.webp"
+      ],
+      "consoleErrors": []
+    }
+  },
+  "demo": {
+    "initial": {
+      "url": "https://freelancer-agent-context.sociobot.in/?demo=1",
+      "title": "Demo — Client Context Firewall",
+      "h1": "Check this client session",
+      "banner": "DemoSample data. Nothing is saved.Reset demoStart for real",
+      "body": "Skip to main content\nCF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY\nDEMO\nSample data. Nothing is saved.\nReset demo\nStart for real\n\nSAMPLE WORKSPACE\n\nCheck this client session\nDEVICE LOCAL\nCLIENTS\n+\nNS\nNorthstar Coffee\nJL\nJuniper Legal\n\nACTIVE BOUNDARY\n\nNorthstar Coffee\nDelete workspace\nCLIENT BRIEF\n\nShip the wholesale reorder portal. Keep the checkout copy direct and friendly.\n\nWRITING RULE\n\nShort sentences. Use “shops”, not “partners”. Never promise same-day delivery.\n\nEdit the client boundary\nSources in this session\nGit · northstar/reorder\ncodex · isolated client profile · /projects/northstar-reorder\nSign-in reminder: dev@northstar.example\nDrive · Wholesale briefs\nclaude · isolated client profile · /projects/northstar-briefs\nSign-in reminder: sam@northstar.example\nText to check (optional)\nCHECK BOUNDARY\nDelivery records\n\nNo delivery records yet.\n\nCheck the boundary, then open every selected agent to create one.\n\n2 redaction rules\n\nNS_LIVE_KEY · Juniper Legal\n\nKeep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5\n\nCheck this client session",
+      "local": {
+        "ccf:sentinel": "real-data"
+      },
+      "session": {}
+    },
+    "blocked": "SESSION BLOCKED\n\nFix 3 boundary checks\nText names another client: Juniper Legal.\nText contains redaction term: NS_LIVE_KEY.\nText contains redaction term: Juniper Legal.\n\nChange the account or text, then check again.",
+    "changedStorage": {
+      "local": {
+        "ccf:sentinel": "real-data"
+      },
+      "session": {
+        "demo:workspace-state": "{\"workspaces\":[{\"id\":\"northstar\",\"name\":\"Northstar Coffee\",\"code\":\"NS\",\"brief\":\"Ship the wholesale reorder portal. Keep the checkout copy direct and friendly.\",\"voice\":\"Short sentences. Use “shops”, not “partners”. Never promise same-day delivery.\",\"sources\":[{\"id\":\"ns-git\",\"label\":\"northstar/reorder\",\"account\":\"dev@northstar.example\",\"kind\":\"Git\",\"connector\":\"codex\",\"folder\":\"/projects/northstar-reorder\"},{\"id\":\"ns-drive\",\"label\":\"Wholesale briefs\",\"account\":\"sam@northstar.example\",\"kind\":\"Drive\",\"connector\":\"claude\",\"folder\":\"/projects/northstar-briefs\"}],\"rules\":[{\"id\":\"ns-secret\",\"term\":\"NS_LIVE_KEY\",\"replacement\":\"[REDACTED KEY]\"},{\"id\":\"ns-other\",\"term\":\"Juniper Legal\",\"replacement\":\"[OTHER CLIENT]\"}],\"updatedAt\":\"2026-08-28T08:45:00.000Z\"},{\"id\":\"juniper\",\"name\":\"Juniper Legal\",\"code\":\"JL\",\"brief\":\"Prepare the intake prototype for solo legal practices. No production client records.\",\"voice\":\"Precise and calm. Explain each legal term the first time it appears.\",\"sources\":[{\"id\":\"jl-git\",\"label\":\"juniper/intake\",\"account\":\"contractor@juniper.example\",\"kind\":\"Git\",\"connector\":\"codex\",\"folder\":\"/projects/juniper-intake\"},{\"id\":\"jl-chat\",\"label\":\"Product channel\",\"account\":\"contractor-jl\",\"kind\":\"Chat\",\"connector\":\"gemini\",\"folder\":\"/projects/juniper-notes\"}],\"rules\":[{\"id\":\"jl-secret\",\"term\":\"JUNIPER_TOKEN\",\"replacement\":\"[REDACTED TOKEN]\"},{\"id\":\"jl-other\",\"term\":\"Northstar Coffee\",\"replacement\":\"[OTHER CLIENT]\"}],\"updatedAt\":\"2026-08-27T15:10:00.000Z\"}],\"activeId\":\"northstar\",\"sessions\":[{\"id\":\"f3fd8d0e-3579-443c-b57e-591fc7e8aaaf\",\"workspaceId\":\"northstar\",\"startedAt\":\"2026-08-29T04:13:16.754Z\",\"sourceIds\":[\"ns-git\"],\"checks\":[\"Sample only — no local folder, profile, or connector was validated\",\"No other client names found\",\"2 redaction rules checked\"],\"status\":\"sample\",\"launches\":[]}]}"
+      }
+    },
+    "afterReset": {
+      "local": {
+        "ccf:sentinel": "real-data"
+      },
+      "session": {},
+      "body": "Skip to main content\nCF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY\nDEMO\nSample data. Nothing is saved.\nReset demo\nStart for real\n\nSAMPLE WORKSPACE\n\nCheck this client session\nDEVICE LOCAL\nDemo reset to its original sample.\nCLIENTS\n+\nNS\nNorthstar Coffee\nJL\nJuniper Legal\n\nACTIVE BOUNDARY\n\nNorthstar Coffee\nDelete workspace\nCLIENT BRIEF\n\nShip the wholesale reorder portal. Keep the checkout copy direct and friendly.\n\nWRITING RULE\n\nShort sentences. Use “shops”, not “partners”. Never promise same-day delivery.\n\nEdit the client boundary\nSources in this session\nGit · northstar/reorder\ncodex · isolated client profile · /projects/northstar-reorder\nSign-in reminder: dev@northstar.example\nDrive · Wholesale briefs\nclaude · isolated client profile · /projects/northstar-briefs\nSign-in reminder: sam@northstar.example\nText to check (optional)\nCHECK BOUNDARY\nDelivery records\n\nNo delivery records yet.\n\nCheck the boundary, then open every selected agent to create one.\n\n2 redaction rules\n\nNS_LIVE_KEY · Juniper Legal\n\nKeep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5\n\nCheck this client session"
+    },
+    "afterReal": {
+      "url": "https://freelancer-agent-context.sociobot.in/app",
+      "local": {
+        "ccf:sentinel": "real-data"
+      },
+      "session": {},
+      "h1": "Create your first client workspace"
+    },
+    "consoleErrors": []
+  },
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Client Context Firewall — Keep client work apart",
+      "description": "Keep each client’s sources, rules, and delivery record in one local workspace.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/",
+      "ogTitle": "Client Context Firewall — Keep client work apart",
+      "ogDescription": "Keep each client’s sources, rules, and delivery record in one local workspace.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Keep client work from crossing over"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Keep client work from crossing over"
+        },
+        {
+          "level": 2,
+          "text": "Preview a checked client session"
+        },
+        {
+          "level": 3,
+          "text": "Sources in this session"
+        },
+        {
+          "level": 2,
+          "text": "How the client check works"
+        },
+        {
+          "level": 3,
+          "text": "Name the workspace"
+        },
+        {
+          "level": 3,
+          "text": "Scope each source"
+        },
+        {
+          "level": 3,
+          "text": "Launch and export"
+        },
+        {
+          "level": 2,
+          "text": "What the app checks"
+        },
+        {
+          "level": 2,
+          "text": "Install the desktop app"
+        },
+        {
+          "level": 2,
+          "text": "Pro pricing"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Try it with sample data",
+          "href": "https://freelancer-agent-context.sociobot.in/?demo=1",
+          "rel": ""
+        },
+        {
+          "text": "Buy Pro",
+          "href": "https://api.sociobot.in/api/v1/products/freelancer-agent-context/checkout",
+          "rel": ""
+        },
+        {
+          "text": "Request a refund from Sociobot",
+          "href": "mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund",
+          "rel": ""
+        },
+        {
+          "text": "Read purchase terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "title": "Demo — Client Context Firewall",
+      "description": "Try a sample client workspace. Sample changes stay in this tab.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/demo",
+      "ogTitle": "Demo — Client Context Firewall",
+      "ogDescription": "Try a sample client workspace. Sample changes stay in this tab.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Check this client session"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Check this client session"
+        },
+        {
+          "level": 2,
+          "text": "Northstar Coffee"
+        },
+        {
+          "level": 3,
+          "text": "Client brief"
+        },
+        {
+          "level": 3,
+          "text": "Writing rule"
+        },
+        {
+          "level": 3,
+          "text": "Add a source"
+        },
+        {
+          "level": 3,
+          "text": "Add a redaction rule"
+        },
+        {
+          "level": 2,
+          "text": "Delivery records"
+        },
+        {
+          "level": 2,
+          "text": "Create a client workspace"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/demo#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Start for real",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/app",
+      "status": 200,
+      "title": "Workspace — Client Context Firewall",
+      "description": "Create and check local client workspaces in the browser preview.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/app",
+      "ogTitle": "Workspace — Client Context Firewall",
+      "ogDescription": "Create and check local client workspaces in the browser preview.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Create your first client workspace"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Create your first client workspace"
+        },
+        {
+          "level": 2,
+          "text": "No client workspaces yet"
+        },
+        {
+          "level": 2,
+          "text": "Create a client workspace"
+        },
+        {
+          "level": 2,
+          "text": "Import a workspace backup"
+        },
+        {
+          "level": 3,
+          "text": "Review imported workspace"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/app#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "title": "Privacy — Client Context Firewall",
+      "description": "Learn what Client Context Firewall stores and where workspace data goes.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/privacy",
+      "ogTitle": "Privacy — Client Context Firewall",
+      "ogDescription": "Learn what Client Context Firewall stores and where workspace data goes.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Your client data stays under your control"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Your client data stays under your control"
+        },
+        {
+          "level": 2,
+          "text": "What the app stores"
+        },
+        {
+          "level": 2,
+          "text": "What leaves your device"
+        },
+        {
+          "level": 2,
+          "text": "Delete and export"
+        },
+        {
+          "level": 2,
+          "text": "Contact"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "privacy@sociobot.in",
+          "href": "mailto:privacy@sociobot.in",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms — Client Context Firewall",
+      "description": "Read the Client Context Firewall purchase and use terms.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/terms",
+      "ogTitle": "Terms — Client Context Firewall",
+      "ogDescription": "Read the Client Context Firewall purchase and use terms.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Terms for using the client boundary"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Terms for using the client boundary"
+        },
+        {
+          "level": 2,
+          "text": "Use of the app"
+        },
+        {
+          "level": 2,
+          "text": "Pro plan"
+        },
+        {
+          "level": 2,
+          "text": "License"
+        },
+        {
+          "level": 2,
+          "text": "Refunds"
+        },
+        {
+          "level": 2,
+          "text": "Warranty"
+        },
+        {
+          "level": 2,
+          "text": "Contact"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/terms#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Request a refund from Sociobot",
+          "href": "mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund",
+          "rel": ""
+        },
+        {
+          "text": "support@sociobot.in",
+          "href": "mailto:support@sociobot.in",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/art-provenance",
+      "status": 200,
+      "title": "Art provenance — Client Context Firewall",
+      "description": "Read how the original Client Context Firewall artwork was made.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/art-provenance",
+      "ogTitle": "Art provenance — Client Context Firewall",
+      "ogDescription": "Read how the original Client Context Firewall artwork was made.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "Original art for this product"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Original art for this product"
+        },
+        {
+          "level": 2,
+          "text": "Source record"
+        }
+      ],
+      "main": true,
+      "header": "CF\nCLIENT CONTEXT FIREWALL\nDEMO\nWORKSPACE\nPRIVACY",
+      "footer": "Keep each client’s work in its own workspace.\n\nPRIVACY\nTERMS\nART PROVENANCE\nBUILT BY PARAM FACTORY\n(EXTERNAL SITE)\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance#main",
+          "rel": ""
+        },
+        {
+          "text": "CFClient Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory (external site)",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "axe": []
+    },
+    {
+      "path": "/not-a-real-page",
+      "status": 404,
+      "title": "Page not found — Client Context Firewall",
+      "description": "This Client Context Firewall page was not found. Return home or open the demo.",
+      "canonical": "https://freelancer-agent-context.sociobot.in/404",
+      "ogTitle": "Page not found — Client Context Firewall",
+      "ogDescription": "This Client Context Firewall page was not found. Return home or open the demo.",
+      "ogImage": "https://freelancer-agent-context.sociobot.in/art/social-card.webp",
+      "twitterCard": "summary_large_image",
+      "favicon": "https://freelancer-agent-context.sociobot.in/icons/favicon.svg",
+      "appleTouch": "https://freelancer-agent-context.sociobot.in/icons/apple-touch.png",
+      "lang": "en",
+      "h1s": [
+        "This page was not found"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "This page was not found"
+        }
+      ],
+      "main": true,
+      "header": "CLIENT CONTEXT FIREWALL\nDEMOWORKSPACEPRIVACY",
+      "footer": "KEEP EACH CLIENT’S WORK IN ITS OWN WORKSPACE.\n\nPRIVACYTERMSART PROVENANCEBUILT BY PARAM FACTORY\n\nV0.1.5",
+      "links": [
+        {
+          "text": "Skip to main content",
+          "href": "https://freelancer-agent-context.sociobot.in/not-a-real-page#main",
+          "rel": ""
+        },
+        {
+          "text": "Client Context Firewall",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Demo",
+          "href": "https://freelancer-agent-context.sociobot.in/demo",
+          "rel": ""
+        },
+        {
+          "text": "Workspace",
+          "href": "https://freelancer-agent-context.sociobot.in/app",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Return home",
+          "href": "https://freelancer-agent-context.sociobot.in/",
+          "rel": ""
+        },
+        {
+          "text": "Privacy",
+          "href": "https://freelancer-agent-context.sociobot.in/privacy",
+          "rel": ""
+        },
+        {
+          "text": "Terms",
+          "href": "https://freelancer-agent-context.sociobot.in/terms",
+          "rel": ""
+        },
+        {
+          "text": "Art provenance",
+          "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+          "rel": ""
+        },
+        {
+          "text": "Built by Param Factory",
+          "href": "https://sociobot.in/",
+          "rel": "external"
+        }
+      ],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": [],
+      "axe": []
+    }
+  ],
+  "links": [
+    {
+      "text": "Skip to main content",
+      "href": "https://freelancer-agent-context.sociobot.in/#main",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/#main"
+    },
+    {
+      "text": "CFClient Context Firewall",
+      "href": "https://freelancer-agent-context.sociobot.in/",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/"
+    },
+    {
+      "text": "Demo",
+      "href": "https://freelancer-agent-context.sociobot.in/demo",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/demo"
+    },
+    {
+      "text": "Workspace",
+      "href": "https://freelancer-agent-context.sociobot.in/app",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/app"
+    },
+    {
+      "text": "Privacy",
+      "href": "https://freelancer-agent-context.sociobot.in/privacy",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/privacy"
+    },
+    {
+      "text": "Try it with sample data",
+      "href": "https://freelancer-agent-context.sociobot.in/?demo=1",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/?demo=1"
+    },
+    {
+      "text": "Download for Linux",
+      "href": "https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/download/v0.1.5/Client.Context.Firewall_0.1.5_amd64.AppImage",
+      "status": 200,
+      "finalUrl": "https://release-assets.githubusercontent.com/github-production-release-asset/1349930411/9269b444-032a-435a-97ac-a63e0e013487?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-08-29T05%3A04%3A51Z&rscd=attachment%3B+filename%3DClient.Context.Firewall_0.1.5_amd64.AppImage&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-08-29T04%3A04%3A47Z&ske=2026-08-29T05%3A04%3A51Z&sks=b&skv=2018-11-09&sig=vB8TOyywyosKWt2rXGok19ncXv%2FZncBL7mDrKcxxlEk%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4Nzk3ODYwOCwibmJmIjoxNzg3OTc2ODA4LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.zTW45nJNtP0wyTzC3Eh6JziUgTW7_PKFPK1KCSjPqYs&response-content-disposition=attachment%3B%20filename%3DClient.Context.Firewall_0.1.5_amd64.AppImage&response-content-type=application%2Foctet-stream"
+    },
+    {
+      "text": "Buy Pro",
+      "href": "https://api.sociobot.in/api/v1/products/freelancer-agent-context/checkout",
+      "status": 200,
+      "finalUrl": "https://checkout.dodopayments.com/session/cks_0NmQ1Ti2yknYbYzlOTdZJ"
+    },
+    {
+      "text": "Request a refund from Sociobot",
+      "href": "mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund",
+      "skipped": "non-http"
+    },
+    {
+      "text": "Terms",
+      "href": "https://freelancer-agent-context.sociobot.in/terms",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/terms"
+    },
+    {
+      "text": "Art provenance",
+      "href": "https://freelancer-agent-context.sociobot.in/art-provenance",
+      "status": 200,
+      "finalUrl": "https://freelancer-agent-context.sociobot.in/art-provenance"
+    },
+    {
+      "text": "Built by Param Factory (external site)",
+      "href": "https://sociobot.in/",
+      "status": 200,
+      "finalUrl": "https://sociobot.in/"
+    }
+  ],
+  "history": {
+    "before": 1025,
+    "after": 1021,
+    "focused": {
+      "tag": "H1",
+      "text": "Keep client work from crossing over"
+    },
+    "demoFocused": {
+      "tag": "BODY",
+      "text": "Skip to main content\n    \n    CFClient Context Firewall\n    DemoWorkspacePrivacy\n  DemoSample data. Nothing is saved.Reset demoStart for real\n    Sample workspaceCheck this client sessionDevice local\n    \n    \n    Clients +NSNorthstar CoffeeJLJuniper Legal\n    Active boundaryNorthstar CoffeeDelete workspace\n      Client briefShip the wholesale reorder portal. Keep the checkout copy direct and friendly.Writing ruleShort sentences. Use “shops”, not “partners”. Never promise same-day delivery.\n      Edit the client boundaryClient briefShip the wholesale reorder portal. Keep the checkout copy direct and friendly.Writing ruleSave briefAdd a sourceSource labelLocal folderThe desktop launcher opens the agent in this folder.Coding agentCodex CLIClaude CodeGemini CLIAccount reminder (optional)This label is not used as proof. Sign in inside the isolated agent profile.Source typeGitDriveChatFolderAdd scoped sourceAdd a redaction ruleText to findReplacementAdd rule\n      Sources in this sessionGit · northstar/reordercodex · isolated client profile · /projects/northstar-reorderSign-in reminder: dev@northstar.exampleDrive · Wholesale briefsclaude · isolated client profile · /projects/northstar-briefsSign-in reminder: sam@northstar.example\n        Text to check (optional)\n        Check boundary \n      \n      \n    \n    Delivery recordsNo delivery records yet.Check the boundary, then open every selected agent to create one.2 redaction rulesNS_LIVE_KEY · Juniper Legal\n  Create a client workspace×Client nameClient briefWriting ruleFirst source labelLocal folderCoding agentCodex CLIClaude CodeGemini CLIAccount reminder (optional)First redaction termCancelSave workspace\n  Keep each client’s work in its own workspace.PrivacyTermsArt provenanceBuilt by Param Factory (external site)v0.1.5\n    Check this client session",
+      "y": 634
+    }
+  },
+  "offline": {
+    "error": null,
+    "h1": "Check this client session",
+    "chip": "Offline · device local",
+    "requests": [
+      "https://freelancer-agent-context.sociobot.in/demo",
+      "https://freelancer-agent-context.sociobot.in/assets/index-BqPgBQ2Y.js",
+      "https://freelancer-agent-context.sociobot.in/assets/index-DLMKDkWZ.css",
+      "https://freelancer-agent-context.sociobot.in/demo",
+      "https://freelancer-agent-context.sociobot.in/assets/index-BqPgBQ2Y.js",
+      "https://freelancer-agent-context.sociobot.in/assets/index-DLMKDkWZ.css",
+      "https://freelancer-agent-context.sociobot.in/demo",
+      "https://freelancer-agent-context.sociobot.in/assets/index-BqPgBQ2Y.js",
+      "https://freelancer-agent-context.sociobot.in/assets/index-DLMKDkWZ.css"
+    ]
+  }
+}
