@@ -57,9 +57,9 @@ DEB metadata: client-context-firewall 0.1.9 amd64
 Local package SHA-256 values:
 
 ```text
-AppImage  f432de9183fd441d8b8e64e12dd8ebc87f937c4e8a0c0867b749cdb55b0bc7e4
-DEB       d0002cd655c2d8610a24969063c5a634dad1a0dbeed52b6782c6410cc88f2878
-RPM       c1ae563c178e4e7ce03ca006d83dd550fc639d0096fe023a452947bd58b3ab1a
+AppImage  2ed1b23081a7f6e7609f73e585b7120e67748586c10a4dd1e5577c74d485d031
+DEB       9f231e6a18e5bbb36b00e5913ba418ad0b99ca5ca1c1645616e710b80d1060ad
+RPM       a29300f90b12019bcaf5e221b18922f403ab74568dfee960ad70bbb6beacc01b
 ```
 
 ## Run locally
@@ -77,9 +77,21 @@ Use `/?demo=1` or `/demo` for the isolated sample workspace. The app’s real de
 
 ## Release and deployment
 
-The source release and static deployment are performed after this handoff is committed. Their commit, release workflow, hosted asset checksums, deployment URL, and byte-identity result are recorded in the final handoff update.
+Repair commits are `f13ff08278863eefff09281bb1886938f6356628` (confirmed native launcher) and `a193155` (portable macOS test path and final version). Both are pushed to `main`. Immutable release tag [`v0.1.9`](https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/tag/v0.1.9) was built by successful GitHub Actions run [`33253501090`](https://github.com/B-Divyesh/sf-freelancer-agent-context/actions/runs/33253501090): Linux, Windows, macOS x64, macOS arm64, and checksums all passed. The new native confirmation regression passed on each host before Tauri packaging.
+
+The release contains `.dmg` files for both Mac architectures, `.msi` and `.exe` for Windows, `.AppImage`, `.deb`, and `.rpm` for Linux, plus `SHA256SUMS` and `latest.json`. The published manifest reports `v0.1.9` and a nonempty Mac, Windows, and Linux asset list. A freshly downloaded release DEB passed the published SHA-256 check and reports `client-context-firewall 0.1.9 amd64`.
+
+`/opt/fleet/lib/deploy-static.sh freelancer-agent-context dist/site` deployed the static site to [`https://freelancer-agent-context.sociobot.in`](https://freelancer-agent-context.sociobot.in) on 29 August 2026. The existing Standard Static Web App in `centralus` was reused; deployment `d7316e42-1180-4370-9dc3-281d58fd65d9` completed successfully and custom-domain TLS returned HTTP 200.
+
+Live verification passed:
+
+- `verify-url.sh` found HTTP 200, the correct title, `lang=en`, one H1, main landmark, complete image alternatives, named buttons, and no console errors.
+- Production CSP, HSTS, referrer policy, and nosniff headers are present. `frame-ancestors` is served as a response header.
+- SHA-256 byte identity matched the deployed core JavaScript, application JavaScript, and CSS against `dist/site`.
+- A fresh desktop browser loaded the GitHub release API, rendered the Linux `v0.1.9` AppImage download, had no console errors, and made no external request except `https://api.github.com`. A fresh 390 px demo had one H1, no horizontal overflow, its sample-data banner, no console errors, and no external requests.
+- Live keyboard smoke passed: the skip link is the first focus target and Enter moves focus to `#main`.
 
 ## Known gaps and operator action
 
 - Desktop artifacts remain unsigned. Future signing requires `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` in GitHub Actions. No signing secret is stored here.
-- Linux package and false-launch regression coverage ran locally. macOS and Windows launch confirmation tests run in the release workflow; those native GUI environments are not available in this Linux worker.
+- Linux package and false-launch regression coverage ran locally. The macOS and Windows native confirmation tests passed in the release workflow; native GUI interaction itself remains outside this Linux worker.
