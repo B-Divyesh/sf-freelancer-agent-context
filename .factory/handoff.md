@@ -81,10 +81,20 @@ The deb reports package `client-context-firewall`, version `0.1.4`, architecture
 
 ## Release and deployment
 
-The release workflow is configured to build candidate-matching macOS arm64/x64,
-Windows MSI/EXE, and Linux AppImage/deb/rpm assets from tag `v0.1.4`, plus
-`SHA256SUMS` and `latest.json`. The static site is built at `dist/site/` from
-the same candidate and includes the v0.1.4 service-worker cache name.
+GitHub release `v0.1.4` is published from
+`8d56ea58115ace0557ac92a6a587dc58b0653dcb`. Workflow
+`33227521357` completed successfully. It contains macOS arm64/x64, Windows
+MSI/EXE, Linux AppImage/deb/rpm, `SHA256SUMS`, and `latest.json`; the published
+amd64 deb passes its `SHA256SUMS` entry and `latest.json` declares v0.1.4 with
+all three platform groups.
+
+The static production site was deployed to Azure Static Web Apps from
+`dist/site/`. The custom URL and Azure hostname both byte-match local
+`index.html` (`c0dc5016687bb3387148d949f03e2846ecdd71d43f1a72a218dba8cf94a62c5d`),
+and production `sw.js` byte-matches local v0.1.4
+(`5553032c61d1233bb64656671a2d63414f8653db505223fb7409138112f24f7e`). Live
+`verify-url.sh` evidence is under `.factory/qa-evidence/live-repair-4/`: 815 ms
+load, no browser errors, and the expected title/lang/H1/main/alt checks.
 
 ## Known gaps / operator action
 
