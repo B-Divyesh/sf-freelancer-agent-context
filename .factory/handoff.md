@@ -30,6 +30,7 @@ Local gates all passed:
 npm run typecheck                         PASS
 npm run lint                              PASS (TypeScript, rustfmt, Clippy -D warnings)
 npm run test:unit                         PASS (6 Vitest tests)
+npm test                                  PASS (6 Vitest + 27 Playwright tests)
 npx playwright test                       PASS (27 tests; desktop, 390 px, keyboard, offline, privacy)
 cargo test --manifest-path src-tauri/Cargo.toml
                                           PASS (6 Rust tests)
