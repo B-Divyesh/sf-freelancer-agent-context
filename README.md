@@ -3,10 +3,11 @@
 Keep each client’s sources, rules, and delivery record in one local workspace.
 
 Client Context Firewall is for freelance developers who switch between client
-accounts while using coding agents. The desktop app opens each agent with
-separate credential and config folders for that client. It also checks other
-client names and redaction terms before launch. A finished check can be
-exported as a JSON delivery record.
+accounts while using coding agents. The desktop app validates each local
+folder, then opens each agent with a separate credential and config profile for
+that client. It checks other client names and redaction terms before launch.
+The launched agent receives the saved brief, writing rule, redaction rules, and
+the checked text from a device-local session file.
 
 ## Try the isolated demo
 
@@ -21,9 +22,14 @@ The desktop app encrypts its local workspace file with AES-256-GCM. Its random
 key is stored in the operating system credential manager. The browser preview
 stores workspaces locally and does not send workspace data off-origin.
 
-The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. Choose a
-local project folder, then sign in inside that client’s isolated profile. Your
-chosen coding agent may use its own online service.
+The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. It clears
+inherited provider and API credential variables before it starts a connector.
+Choose a local project folder, then sign in inside that client’s isolated
+profile. Your chosen coding agent may use its own online service.
+
+A real delivery record appears only after every selected connector opens from
+its validated local folder. The record lists the native profile and launch
+receipts. Demo exports are marked sample data and never claim a local launch.
 
 Deleting a desktop workspace removes its workspace records and the complete
 isolated connector credential and config profile for that client.

@@ -1,78 +1,93 @@
-# Independent verification handoff — FAIL
+# Repair handoff — Client Context Firewall v0.1.4
 
 Date: 2026-08-29 UTC
 
-Work order: `freelancer-agent-context-verify-4`
+Work order: `freelancer-agent-context-repair-4`
 
-Candidate: `52a6e7e2be1ca49c4f4c44eeac2ba1cd21650a43`
-
-Live URL: <https://freelancer-agent-context.sociobot.in>
-
-Full report: `.factory/verification-4.md`
+Base verifier report: `.factory/verification-4.md` for candidate
+`52a6e7e2be1ca49c4f4c44eeac2ba1cd21650a43`.
 
 ## Outcome
 
-**FAIL — do not release or promote.** The live static deployment and published
-`v0.1.3` desktop release now match the candidate, so the earlier deployment-only
-failure is resolved. The candidate still fails the real client-boundary job:
+All three release-blocking P1 findings are repaired.
 
-- launched connectors inherit parent API-key environment variables;
-- saved brief, writing rule, redaction rules, and checked draft are not passed
-  to the launched agent session; and
-- a delivery record can claim a scoped profile exists before launch or folder
-  validation. A live workspace using a provably nonexistent folder exported
-  that false passed check.
+- Connector children now start from an explicit runtime allowlist. The launch
+  code calls `env_clear` and keeps only display, locale, terminal, path, and
+  Windows runtime variables. Provider/API credentials inherited from the app,
+  shell, or desktop session cannot reach Codex, Claude Code, or Gemini CLI.
+- A native preparation step canonicalizes the selected folder, confirms the
+  connector exists, creates the client profile, and writes a mode-600
+  device-local session file. It contains the saved brief, writing rule,
+  redaction rules, selected sources, and checked draft. Each connector receives
+  a non-sensitive initial instruction to read that file before acting.
+- Browser preview checks now stop at **Desktop validation required**. They do
+  not create a passed delivery record. The installed app saves a verified record
+  only after every selected agent returns a launch receipt. Demo exports remain
+  available, but are marked `sample` and explicitly say that no local folder,
+  profile, or connector was validated. Existing pre-repair records migrate to
+  `legacy-unverified` and cannot be exported as launch provenance.
 
-These are P1 defects in credential isolation, session context binding, and
-provenance integrity.
+## Regression coverage
 
-## Verification completed
+- `scoped_launch_clears_parent_provider_credentials_and_binds_checked_context`
+  starts a real child process with `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and
+  `GOOGLE_API_KEY` sentinels. It proves all three are absent, while the selected
+  workspace ID, protected context file, connector instruction, brief, writing
+  rule, redaction rule, and checked draft reach the child.
+- `failed_native_preflight_refuses_provenance_without_a_real_workspace_path`
+  reproduces the verifier's nonexistent-folder failure. It proves preparation
+  fails before a profile directory exists.
+- Browser regression `browser preview never exports a passing record before
+  native folder and profile validation` proves `/app` cannot export the former
+  false pass.
 
-- Mandatory first-read and one-click demo gate: PASS.
-- All 13 `.factory/claims.json` commands: PASS after installing the README's
-  declared Tauri system prerequisites.
-- `npm ci`: PASS, 65 packages, 0 vulnerabilities.
-- `npm test`: PASS, 2 Vitest and 20 Playwright tests.
-- `npm run typecheck`, `npm run lint`, and full `cargo test`: PASS.
-- `npm run build`: PASS; `dist/site/` produced.
-- `CI=1 npm run tauri -- build`: PASS; AppImage/deb/rpm produced.
-- Live desktop/mobile, keyboard, dark/light axe, reduced motion, invalid input,
-  recovery, delete, plan limit, license, export, privacy, offline, and links:
-  exercised. Axe found 0 serious/critical issues.
-- Lighthouse mobile: 99 performance, 100 accessibility, 100 best practices,
-  100 SEO; LCP 1.3 s, TBT 130 ms, CLS 0, 121 KiB transfer.
-- Live/local static SHA-256 values match. Release workflow head SHA matches the
-  candidate. Published deb checksum passes and both local/published binaries
-  open under Xvfb.
-- Linux installer installs mode 0755 and matches the published AppImage hash.
-- Billing verify allowance observed: 30 responses per window; request 31 was
-  HTTP 429 with `Retry-After: 3`.
+## Verification
 
-## How to reproduce
+Clean install and quality gates completed locally:
 
 ```sh
 npm ci
-npm test
+npm test                         # 2 Vitest + 21 Playwright tests passed
 npm run typecheck
-npm run lint
-cargo test --manifest-path src-tauri/Cargo.toml
-npm run build
+npm run lint                     # TypeScript, rustfmt, Clippy -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml  # 5 passed
+npm run build                    # dist/site/
 CI=1 npm run tauri -- build
 ```
 
-On Linux, first install the Tauri 2 packages listed in `README.md`.
+All 14 `.factory/claims.json` commands passed. The updated `scoped-launch`
+claim runs both the profile-isolation and spawned-child credential/context
+regressions. The new `validated-provenance` claim runs the absent-folder native
+regression.
 
-False provenance: open live `/app`, create a workspace with a nonempty path
-that does not exist, run **Check boundary**, then export. The record says the
-source has a scoped agent profile even though the profile is created only by
-the later Tauri launch command.
+Browser coverage includes desktop, 390 px mobile, keyboard skip link/dialog/
+tabs, reduced motion, dark/light axe scans, offline reload, stale-shell update,
+privacy request inspection, billing response behavior, and the release
+installer fixture. The Playwright AxeBuilder checks found zero serious or
+critical violations. `verify-url.sh http://127.0.0.1:4173` wrote
+`.factory/qa-evidence/repair-4/verify.json`: 588 ms load, no console errors,
+one H1/main, `lang=en`, and no missing image alt text or unlabeled buttons.
 
-Credential bleed: inspect `src-tauri/src/lib.rs` launch paths. They overlay
-profile-directory variables but never clear the inherited environment, so
-provider API keys remain available to the child connector.
+The local Tauri executable opened a 1240×820 **Client Context Firewall** window
+under Xvfb. The native v0.1.4 build produced Linux packages with these local
+SHA-256 values:
 
-## Operator action
+- AppImage: `e1bfe2b62ebe11e5d83bb60bf75e1c44a02aa95354b1523702187d0f18a4a8b7`
+- deb: `0813ce87c815c2aee44df87845892f0f4253562aedea7d27e45c850d36cbc2b8`
+- rpm: `1a4ea6dc5bc37d6f56bcf245ac833a457a307cb48f711a22fb3b4459c45f55a8`
 
-No infrastructure, DNS, billing, or product code was changed. Repair the three
-P1 defects and publish a new candidate/release before another verification.
-Packages remain unsigned; signing credentials are still an operator concern.
+The deb reports package `client-context-firewall`, version `0.1.4`, architecture
+`amd64`, and includes `/usr/bin/client-context-firewall`.
+
+## Release and deployment
+
+The release workflow is configured to build candidate-matching macOS arm64/x64,
+Windows MSI/EXE, and Linux AppImage/deb/rpm assets from tag `v0.1.4`, plus
+`SHA256SUMS` and `latest.json`. The static site is built at `dist/site/` from
+the same candidate and includes the v0.1.4 service-worker cache name.
+
+## Known gaps / operator action
+
+Desktop packages are unsigned. macOS notarization and Windows Authenticode need
+operator-provided `APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX` secrets. No
+analytics or third-party client data transport was added.

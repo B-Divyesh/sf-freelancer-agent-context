@@ -13,6 +13,16 @@ let notice = '';
 let licenseNotice = false;
 let initialRoute = true;
 let licenseVerification: { token: string; promise: Promise<boolean> } | null = null;
+type NativeLaunchRequest = {
+  sessionId: string; workspaceId: string; workspaceName: string; sourceId: string; sourceLabel: string;
+  connector: Connector; folder: string; selectedSources: Source[]; brief: string; writingRule: string;
+  redactionRules: { term: string; replacement: string }[]; checkedDraft: string;
+};
+type PreparedSession = {
+  id: string; workspaceId: string; sourceIds: string[]; checks: string[];
+  requests: Map<string, NativeLaunchRequest>; profileDirs: Map<string, string>;
+};
+let preparedSession: PreparedSession | null = null;
 
 const isDesktop = () => '__TAURI_INTERNALS__' in window;
 
@@ -27,7 +37,7 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Keep each client’s work in its own boundary.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.3 · Original generated art</p></footer>`;
+  return `<footer><p>Keep each client’s work in its own boundary.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.4 · Original generated art</p></footer>`;
 }
 
 function icon(name: 'check'|'arrow'|'lock'|'export'): string {
@@ -55,7 +65,7 @@ function landing(): void {
         <div class="preview-tabs"><span>NS</span><span class="inactive">JL</span></div><div class="preview-sheet"><p class="stamp">NORTHSTAR / SESSION READY</p><h3>Sources in this session</h3><p>Codex · northstar/reorder <b>isolated profile</b></p><p>Claude · Wholesale briefs <b>isolated profile</b></p><ol class="check-list"><li>Client profile is separate</li><li>No other client names found</li><li>Two redaction rules loaded</li></ol></div>
       </div>
     </section>
-    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">Set the boundary once</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Scope each connector</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open the agent in its client-only profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>A clean check creates a delivery record.</figcaption></figure></li></ol></section>
+    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">Set the boundary once</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Scope each connector</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open every selected agent in its client-only profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>Validated launch receipts enable a verified delivery record.</figcaption></figure></li></ol></section>
     <section class="limits" aria-labelledby="limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="limits-title">A local launch boundary</h2></div><div><p>The desktop app separates each client’s agent credentials and config.</p><p>Your chosen agent may use its own online service.</p><p>The text check catches named clients and redaction terms before launch.</p></div></section>
     <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install your local workspace</h2><p>Choose the package for your system when releases are published. Current builds are unsigned.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
     <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">More clients, same local boundary</h2><p class="price"><strong>$19</strong> once</p><p>Pro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Paste a license</button><p>Sociobot is the merchant of record. Manage refunds there.</p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
@@ -124,7 +134,15 @@ function renderActive(active: Workspace): string {
 }
 
 function renderLedger(active: Workspace, sessions = state.sessions.filter(session => session.workspaceId === active.id)): string {
-  return `<h2>Delivery records</h2>${sessions.length ? `<ol>${sessions.map(session => `<li><span>${new Date(session.startedAt).toLocaleDateString()}</span><b>${session.sourceIds.length} source${session.sourceIds.length === 1 ? '' : 's'} checked</b></li>`).join('')}</ol><button class="button secondary" id="export-record">Export latest record ${icon('export')}</button>` : '<p>No delivery records yet.</p><p>Run a clean session check to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(rule => escapeHtml(rule.term)).join(' · ')}</p></div>`;
+  const latest = sessions[0];
+  const completeLaunch = latest?.status === 'launched' && latest.sourceIds.every(sourceId => latest.launches.some(launch => launch.sourceId === sourceId));
+  const canExport = latest?.status === 'sample' || completeLaunch;
+  const recordLabel = latest?.status === 'sample' ? 'Export sample record' : 'Export latest record';
+  const details = sessions.map(session => {
+    const outcome = session.status === 'sample' ? 'sample only' : session.status === 'legacy-unverified' ? 'not verified after update' : `${session.launches.length}/${session.sourceIds.length} agent launch receipts`;
+    return `<li><span>${new Date(session.startedAt).toLocaleDateString()}</span><b>${session.sourceIds.length} source${session.sourceIds.length === 1 ? '' : 's'} checked</b><small>${outcome}</small></li>`;
+  }).join('');
+  return `<h2>Delivery records</h2>${sessions.length ? `<ol>${details}</ol>${canExport ? `<button class="button secondary" id="export-record">${recordLabel} ${icon('export')}</button>` : '<p>Open every checked agent before exporting a verified delivery record.</p>'}` : '<p>No delivery records yet.</p><p>Check the boundary, then open every selected agent to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(rule => escapeHtml(rule.term)).join(' · ')}</p></div>`;
 }
 
 function workspaceDialog(): string {
@@ -135,6 +153,7 @@ async function renderWorkspace(): Promise<void> {
   demo = location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
   document.title = demo ? 'Demo — Client Context Firewall' : 'Workspace — Client Context Firewall';
   state = await loadState(demo);
+  preparedSession = null;
   notice = getStorageError() || notice;
   app.innerHTML = workspaceShell();
   wireShared(); wireWorkspace();
@@ -204,6 +223,7 @@ async function runPreflight(event: Event): Promise<void> {
   event.preventDefault(); const form = event.currentTarget as HTMLFormElement; const data = new FormData(form);
   const active = state.workspaces.find(w => w.id === state.activeId)!; const sourceIds = data.getAll('source').map(String); const draft = String(data.get('draft'));
   const selected = active.sources.filter(s => sourceIds.includes(s.id)); const failures: string[] = [];
+  preparedSession = null;
   if (!selected.length) failures.push('Choose at least one source.');
   if (selected.some(source => !source.folder.trim())) failures.push('Set a local folder for every selected source.');
   const foreign = state.workspaces.filter(w => w.id !== active.id).find(w => draft.toLowerCase().includes(w.name.toLowerCase()));
@@ -211,36 +231,62 @@ async function runPreflight(event: Event): Promise<void> {
   for (const rule of active.rules) if (draft.toLowerCase().includes(rule.term.toLowerCase())) failures.push(`Text contains redaction term: ${rule.term}.`);
   const result = document.querySelector<HTMLDivElement>('#check-result')!;
   if (failures.length) { result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">SESSION BLOCKED</p><h3>Fix ${failures.length} boundary ${failures.length === 1 ? 'check' : 'checks'}</h3><ul>${failures.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul><p>Change the account or text, then check again.</p></section>`; result.firstElementChild?.scrollIntoView({behavior:'smooth', block:'nearest'}); return; }
-  const checks = ['Each selected source has a scoped agent profile', 'No other client names found', `${active.rules.length} redaction rules checked`];
-  const nextState = structuredClone(state); nextState.sessions.unshift({ id: uid(), workspaceId: active.id, startedAt: new Date().toISOString(), sourceIds, checks });
-  try { await saveState(nextState, demo); state = nextState; }
-  catch { result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">NOT SAVED</p><h3>The delivery record was not created</h3><p>${escapeHtml(getStorageError())}</p></section>`; (result.firstElementChild as HTMLElement).focus(); return; }
-  result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">BOUNDARY PASSED</p><h3>Session ready for ${escapeHtml(active.name)}</h3><ul>${checks.map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><div class="launch-actions">${selected.map(source => `<button class="button secondary" type="button" data-launch-source="${escapeHtml(source.id)}">Open ${escapeHtml(source.connector)} for ${escapeHtml(source.label)}</button>`).join('')}</div><p class="launch-help">${demo ? 'Demo mode shows the launch step but never opens a local process.' : isDesktop() ? 'The agent opens with this client’s separate credential and config folders.' : 'Install the desktop app to open a scoped agent.'}</p><div class="launch-status" aria-live="polite"></div></section>`;
+  const checks = ['No other client names found', `${active.rules.length} redaction rules checked`];
+  if (demo) {
+    const nextState = structuredClone(state);
+    nextState.sessions.unshift({ id: uid(), workspaceId: active.id, startedAt: new Date().toISOString(), sourceIds, checks: ['Sample only — no local folder, profile, or connector was validated', ...checks], status: 'sample', launches: [] });
+    try { await saveState(nextState, true); state = nextState; }
+    catch { result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">NOT SAVED</p><h3>The sample record was not created</h3><p>${escapeHtml(getStorageError())}</p></section>`; (result.firstElementChild as HTMLElement).focus(); return; }
+    result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">SAMPLE SESSION READY</p><h3>Sample check complete for ${escapeHtml(active.name)}</h3><ul>${['Sample only — no local profile was created', ...checks].map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><p class="launch-help">Demo mode never opens a local process or creates launch provenance.</p></section>`;
+    const ledger = document.querySelector<HTMLElement>('.ledger'); if (ledger) ledger.innerHTML = renderLedger(active);
+    document.querySelector('#export-record')?.addEventListener('click', exportLatest);
+    (result.firstElementChild as HTMLElement).focus(); return;
+  }
+  if (!isDesktop()) {
+    result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">DESKTOP VALIDATION REQUIRED</p><h3>Open this workspace in the desktop app</h3><p>The browser preview cannot validate your local folder or create a scoped agent profile. It will not create a passing delivery record.</p></section>`;
+    (result.firstElementChild as HTMLElement).focus(); return;
+  }
+  const sessionId = uid();
+  const requests = new Map<string, NativeLaunchRequest>();
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    for (const source of selected) {
+      const request: NativeLaunchRequest = { sessionId, workspaceId: active.id, workspaceName: active.name, sourceId: source.id, sourceLabel: source.label, connector: source.connector, folder: source.folder, selectedSources: selected, brief: active.brief, writingRule: active.voice, redactionRules: active.rules.map(({term, replacement}) => ({term, replacement})), checkedDraft: draft };
+      await invoke('prepare_scoped_session', { request });
+      requests.set(source.id, request);
+    }
+  } catch (error) {
+    result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">SESSION NOT PREPARED</p><h3>The local boundary was not validated</h3><p>${escapeHtml(String(error))}</p><p>Check the folder and installed agent, then try again. No delivery record was created.</p></section>`;
+    (result.firstElementChild as HTMLElement).focus(); return;
+  }
+  preparedSession = { id: sessionId, workspaceId: active.id, sourceIds, checks: ['Each selected source has a validated scoped agent profile', ...checks], requests, profileDirs: new Map() };
+  result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">BOUNDARY PREPARED</p><h3>Open every checked agent for ${escapeHtml(active.name)}</h3><ul>${preparedSession.checks.map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><div class="launch-actions">${selected.map(source => `<button class="button secondary" type="button" data-launch-source="${escapeHtml(source.id)}">Open ${escapeHtml(source.connector)} for ${escapeHtml(source.label)}</button>`).join('')}</div><p class="launch-help">Each agent receives this saved brief, writing rule, redaction rules, and checked text through its client-only profile. A delivery record is available after every selected agent opens.</p><div class="launch-status" aria-live="polite"></div></section>`;
   document.querySelectorAll<HTMLButtonElement>('[data-launch-source]').forEach(button => button.addEventListener('click', () => launchScopedAgent(button.dataset.launchSource!, button)));
-  const ledger = document.querySelector<HTMLElement>('.ledger'); if (ledger) ledger.innerHTML = renderLedger(active);
-  document.querySelector('#export-record')?.addEventListener('click', exportLatest);
   (result.firstElementChild as HTMLElement).focus();
 }
 
 async function launchScopedAgent(sourceId: string, button: HTMLButtonElement): Promise<void> {
   const statusNode = document.querySelector<HTMLDivElement>('.launch-status');
-  if (demo) { if (statusNode) statusNode.textContent = 'Demo mode does not open local apps. Start for real in the desktop app.'; return; }
-  if (!isDesktop()) { if (statusNode) statusNode.textContent = 'Install the desktop app to open an isolated agent profile.'; return; }
+  if (demo || !isDesktop()) { if (statusNode) statusNode.textContent = 'Only a prepared desktop session can open an agent.'; return; }
   const workspace = state.workspaces.find(item => item.id === state.activeId);
   const source = workspace?.sources.find(item => item.id === sourceId);
-  if (!workspace || !source) return;
+  const pending = preparedSession;
+  const request = pending && pending.workspaceId === workspace?.id ? pending.requests.get(sourceId) : undefined;
+  if (!workspace || !source || !request || !pending) { if (statusNode) statusNode.textContent = 'Run the boundary check again before opening an agent.'; return; }
   button.disabled = true;
   if (statusNode) statusNode.textContent = `Opening ${source.connector} in the ${workspace.name} profile…`;
   try {
     const { invoke } = await import('@tauri-apps/api/core');
-    const receipt = await invoke<{ profileDir: string }>('launch_scoped_agent', { request: {
-      workspaceId: workspace.id,
-      workspaceName: workspace.name,
-      sourceId: source.id,
-      connector: source.connector,
-      folder: source.folder
-    }});
-    if (statusNode) statusNode.textContent = `${source.connector} opened. Its client-only profile is ${receipt.profileDir}.`;
+    const receipt = await invoke<{ profileDir: string; contextPath: string }>('launch_scoped_agent', { request });
+    pending.profileDirs.set(sourceId, receipt.profileDir);
+    const nextState = structuredClone(state); const existing = nextState.sessions.find(session => session.id === pending.id);
+    const launch = { sourceId, connector: source.connector, profileDir: receipt.profileDir, contextPath: receipt.contextPath, launchedAt: new Date().toISOString() };
+    if (existing) existing.launches = [...existing.launches.filter(item => item.sourceId !== sourceId), launch];
+    else nextState.sessions.unshift({ id: pending.id, workspaceId: workspace.id, startedAt: new Date().toISOString(), sourceIds: pending.sourceIds, checks: pending.checks, status: 'launched', launches: [launch] });
+    await saveState(nextState, false); state = nextState;
+    const completed = pending.sourceIds.every(id => state.sessions.find(session => session.id === pending.id)?.launches.some(item => item.sourceId === id));
+    if (statusNode) statusNode.textContent = completed ? `${source.connector} opened. Every selected agent has a launch receipt; the verified delivery record is ready.` : `${source.connector} opened. Open the remaining checked agents before exporting the delivery record.`;
+    const ledger = document.querySelector<HTMLElement>('.ledger'); if (ledger) { ledger.innerHTML = renderLedger(workspace); document.querySelector('#export-record')?.addEventListener('click', exportLatest); }
   } catch (error) {
     if (statusNode) statusNode.textContent = `The agent did not open. ${String(error)} Check the folder and install ${source.connector}, then try again.`;
   } finally { button.disabled = false; }
@@ -248,13 +294,15 @@ async function launchScopedAgent(sourceId: string, button: HTMLButtonElement): P
 
 function exportLatest(): void {
   const active = state.workspaces.find(w => w.id === state.activeId)!; const session = state.sessions.find(s => s.workspaceId === active.id); if (!session) return;
-  const record = { product: 'Client Context Firewall', client: active.name, createdAt: session.startedAt, sources: active.sources.filter(s => session.sourceIds.includes(s.id)).map(({label, account, kind}) => ({kind,label,account})), checks: session.checks, statement: 'This record lists the boundary check inputs. It is not a guarantee against data loss.' };
+  const completeLaunch = session.status === 'launched' && session.sourceIds.every(sourceId => session.launches.some(launch => launch.sourceId === sourceId));
+  if (session.status !== 'sample' && !completeLaunch) return;
+  const record = { product: 'Client Context Firewall', client: active.name, createdAt: session.startedAt, status: session.status, sources: active.sources.filter(s => session.sourceIds.includes(s.id)).map(({label, account, kind}) => ({kind,label,account})), checks: session.checks, launches: session.launches, statement: session.status === 'sample' ? 'Sample data only. No local folder, scoped profile, or connector launch was validated.' : 'This record lists native profile validation and connector launch receipts. It is not a guarantee against data loss.' };
   const blob = new Blob([JSON.stringify(record, null, 2)], {type:'application/json'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${active.code.toLowerCase()}-delivery-record.json`; link.click(); URL.revokeObjectURL(link.href);
 }
 
 function legal(kind: 'privacy'|'terms'): void {
   const privacy = kind === 'privacy'; document.title = `${privacy ? 'Privacy' : 'Terms'} — Client Context Firewall`;
-  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets separate connector credential and config folders. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data. Your chosen coding agent may use its own online service. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app to remove its local records and complete isolated connector profile. Export a delivery record before offboarding if you need an audit trail.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
+  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets separate connector credential and config folders. The checked brief, writing rule, redaction rules, and draft are written inside that profile only for the prepared session. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data. The desktop launcher clears inherited provider and API credential variables before it starts your connector. Your chosen coding agent may use its own online service after launch. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app to remove its local records and complete isolated connector profile. A verified delivery record is available only after every selected connector launch succeeds.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
 }
 
 function notFound(): void { document.title = 'Page not found — Client Context Firewall'; app.innerHTML = `${header()}<main id="main" class="not-found" tabindex="-1"><p class="huge">404</p><h1 tabindex="-1">This page crossed the wrong boundary</h1><p>The address does not match a page in this workspace.</p><a class="button primary nav-link" href="/">Return home</a></main>${footer()}`; wireShared(); }

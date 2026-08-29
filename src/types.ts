@@ -19,4 +19,20 @@ export type Workspace = {
   updatedAt: string;
 };
 export type AppState = { workspaces: Workspace[]; activeId: string | null; sessions: Session[] };
-export type Session = { id: string; workspaceId: string; startedAt: string; sourceIds: string[]; checks: string[] };
+export type LaunchOutcome = {
+  sourceId: string;
+  connector: Connector;
+  profileDir: string;
+  contextPath: string;
+  launchedAt: string;
+};
+export type Session = {
+  id: string;
+  workspaceId: string;
+  startedAt: string;
+  sourceIds: string[];
+  checks: string[];
+  /** Sample records are never presented as native launch provenance. */
+  status: 'sample' | 'launched' | 'legacy-unverified';
+  launches: LaunchOutcome[];
+};

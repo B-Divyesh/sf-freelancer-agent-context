@@ -30,8 +30,8 @@ Headings, labels, and buttons are included even when they are fragments.
 | Choose a local folder and agent for this client. | 9 | Pass |
 | Another client name or redaction term stops the session. | 9 | Pass |
 | Launch and export | 3 | Pass |
-| Open the agent in its client-only profile, then export the delivery record. | 12 | Pass |
-| A clean check creates a delivery record. | 7 | Pass |
+| Open every selected agent in its client-only profile, then export the delivery record. | 14 | Pass |
+| Validated launch receipts enable a verified delivery record. | 8 | Pass |
 | A local launch boundary | 4 | Pass |
 | The desktop app separates each client’s agent credentials and config. | 10 | Pass |
 | Your chosen agent may use its own online service. | 9 | Pass |
@@ -54,6 +54,15 @@ Headings, labels, and buttons are included even when they are fragments.
 
 No entry exceeds 22 words or contains a banned marketing word. The first
 screen states the job, user, next action, privacy, offline behavior, and price.
+
+The repaired workspace text also remains within the 22-word limit:
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| The browser preview cannot validate your local folder or create a scoped agent profile. | 15 | Pass |
+| It will not create a passing delivery record. | 9 | Pass |
+| Each agent receives this saved brief, writing rule, redaction rules, and checked text through its client-only profile. | 17 | Pass |
+| A delivery record is available after every selected agent opens. | 11 | Pass |
 
 ## Terminology
 

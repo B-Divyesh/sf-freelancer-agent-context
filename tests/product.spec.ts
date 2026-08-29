@@ -84,7 +84,7 @@ test('@claim:demo-isolation sample changes never enter real storage', async ({ p
   await page.goto('/demo');
   await page.getByLabel('Text to check (optional)').fill('A sample draft');
   await page.getByRole('button', {name:/Check boundary/}).click();
-  await expect(page.getByText('Session ready for Northstar Coffee')).toBeVisible();
+  await expect(page.getByText('Sample check complete for Northstar Coffee')).toBeVisible();
   const storage = await page.evaluate(() => ({sentinel: localStorage.getItem('ccf:sentinel'), demoInLocal: localStorage.getItem('demo:workspace-state'), demoInSession: sessionStorage.getItem('demo:workspace-state')}));
   expect(storage.sentinel).toBe('real-data'); expect(storage.demoInLocal).toBeNull(); expect(storage.demoInSession).toContain('northstar');
 });
@@ -98,16 +98,16 @@ test('@claim:boundary-check blocks another client name and a redaction term', as
   await expect(page.getByText(/Text contains redaction term/)).toBeVisible();
 });
 
-test('@claim:provenance-export exports the checked source record', async ({ page }) => {
+test('@claim:provenance-export exports an explicitly simulated sample record', async ({ page }) => {
   await page.goto('/demo');
   await page.getByRole('button', {name:/Check boundary/}).click();
-  await expect(page.getByText('Session ready for Northstar Coffee')).toBeVisible();
+  await expect(page.getByText('Sample check complete for Northstar Coffee')).toBeVisible();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', {name:/Export latest record/}).click();
+  await page.getByRole('button', {name:/Export sample record/}).click();
   const download = await downloadPromise; const path = await download.path();
   expect(download.suggestedFilename()).toBe('ns-delivery-record.json');
   const content = await import('node:fs/promises').then(fs => fs.readFile(path!, 'utf8')); const record = JSON.parse(content);
-  expect(record.client).toBe('Northstar Coffee'); expect(record.sources).toHaveLength(1); expect(record.checks).toHaveLength(3);
+  expect(record.client).toBe('Northstar Coffee'); expect(record.sources).toHaveLength(1); expect(record.status).toBe('sample'); expect(record.launches).toEqual([]); expect(record.statement).toMatch(/No local folder/);
 });
 
 test('failed workspace saves stay retryable and never display unsaved data as saved', async ({page}) => {
@@ -147,8 +147,24 @@ test('@claim:device-local browser workspace flow sends no workspace data off-ori
   await page.getByLabel('First redaction term').fill('ACORN_KEY');
   await page.getByRole('button', {name:'Save workspace'}).click();
   await page.getByRole('button', {name:/Check boundary/}).click();
-  await expect(page.getByText('Session ready for Acorn')).toBeVisible();
+  await expect(page.getByRole('heading', {name:'Open this workspace in the desktop app'})).toBeVisible();
   expect(external).toEqual([]);
+});
+
+test('browser preview never exports a passing record before native folder and profile validation', async ({page}) => {
+  await page.goto('/app');
+  await page.getByRole('button', {name:'Create a workspace'}).click();
+  await page.getByLabel('Client name').fill('Impossible Path Client');
+  await page.getByLabel('Client brief').fill('Build the client portal.');
+  await page.getByLabel('Writing rule').fill('Use short sentences.');
+  await page.getByLabel('First source label').fill('impossible/repo');
+  await page.getByLabel('Local folder').fill('/definitely/not/a/real/folder/qa-regression');
+  await page.getByLabel('First redaction term').fill('IMPOSSIBLE_KEY');
+  await page.getByRole('button', {name:'Save workspace'}).click();
+  await page.getByRole('button', {name:/Check boundary/}).click();
+  await expect(page.getByRole('heading', {name:'Open this workspace in the desktop app'})).toBeVisible();
+  await expect(page.getByRole('button', {name:/Export latest record|Export sample record/})).toHaveCount(0);
+  await expect(page.getByText(/No delivery records yet/)).toBeVisible();
 });
 
 test('@claim:offline-reload demo works offline after the first visit', async ({page, context}) => {
@@ -183,9 +199,9 @@ test('@claim:plan-limit free stops at two workspaces and Pro allows more than tw
 test('@claim:free-core free workspaces can check and export a delivery record', async ({page}) => {
   await page.goto('/demo');
   await page.getByRole('button', {name:/Check boundary/}).click();
-  await expect(page.getByText('Session ready for Northstar Coffee')).toBeVisible();
+  await expect(page.getByText('Sample check complete for Northstar Coffee')).toBeVisible();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', {name:/Export latest record/}).click();
+  await page.getByRole('button', {name:/Export sample record/}).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('ns-delivery-record.json');
 });
@@ -229,7 +245,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.3']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.4']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);

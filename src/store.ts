@@ -20,6 +20,12 @@ function migrateState(state: AppState): AppState {
       source.folder ||= '';
     }
   }
+  for (const session of state.sessions) {
+    // Records created before native profile validation must never be exported
+    // as evidence of a real scoped launch after an upgrade.
+    session.status ||= 'legacy-unverified';
+    session.launches ||= [];
+  }
   return state;
 }
 
