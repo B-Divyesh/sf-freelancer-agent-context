@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light dark;
+
+  /* Palette: dithered boundary ledger, light treatment. */
+  --color-background: #f3eedf;
+  --color-surface: #fffaf0;
+  --color-text: #1b211d;
+  --color-text-muted: #545e56;
+  --color-rule: #788378;
+  --color-accent: #ad351a;
+  --color-accent-contrast: #ffffff;
+  --color-success: #286a4b;
+  --color-warning: #8b5a00;
+  --color-danger: #a52e2e;
+  --color-warning-surface: #8b5a00;
+  --color-warning-contrast: #fff8e4;
+
+  /* Type: system-owned, self-hosted by definition. */
+  --font-display: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+  --font-body: Charter, "Bitstream Charter", Georgia, serif;
+  --font-data: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2.25rem;
+  --text-display: clamp(2.75rem, 7vw, 4.5rem);
+  --line-body: 1.55;
+  --measure: 68ch;
+
+  /* Four/eight-pixel rhythm. */
+  --space-0-5: 0.25rem;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+  --space-12: 6rem;
+
+  /* Squared sheets, physical ink depth, purposeful motion. */
+  --radius-control: 0;
+  --border-thin: 1px;
+  --border-strong: 2px;
+  --shadow-hard: 3px 3px 0 var(--color-text);
+  --shadow-sheet: 8px 8px 0 var(--color-text);
+  --duration-feedback: 150ms;
+  --duration-print-pass: 220ms;
+  --ease-print: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --target-min: 44px;
+
+  /* Compatibility aliases while inherited styles move to semantic tokens. */
+  --paper: var(--color-background);
+  --sheet: var(--color-surface);
+  --ink: var(--color-text);
+  --muted: var(--color-text-muted);
+  --rule: var(--color-rule);
+  --signal: var(--color-accent);
+  --signal-ink: var(--color-accent-contrast);
+  --safe: var(--color-success);
+  --warning: var(--color-warning);
+  --danger: var(--color-danger);
+  --shadow: var(--shadow-hard);
+
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-background);
+  font-synthesis: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #171916;
+    --color-surface: #222720;
+    --color-text: #f1eddf;
+    --color-text-muted: #adb7ad;
+    --color-rule: #778276;
+    --color-accent: #f77a50;
+    --color-accent-contrast: #171916;
+    --color-success: #69c692;
+    --color-warning: #f1bd58;
+    --color-danger: #ff8c84;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-feedback: 0ms;
+    --duration-print-pass: 0ms;
+  }
+}
