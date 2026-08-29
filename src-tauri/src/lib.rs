@@ -7,9 +7,13 @@ use rand::{rngs::OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
-    env, fs,
+    env,
+    ffi::OsStr,
+    fs,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Child, Command},
+    thread,
+    time::{Duration, Instant},
 };
 use tauri::{AppHandle, Manager};
 
@@ -77,6 +81,7 @@ struct AgentSessionContext {
 struct LaunchReceipt {
     profile_dir: String,
     context_path: String,
+    confirmed: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -341,17 +346,56 @@ fn delete_workspace_scope_at(base: &Path, workspace_id: &str) -> Result<(), Stri
     Ok(())
 }
 
-fn command_exists(command: &str) -> bool {
-    env::var_os("PATH").is_some_and(|paths| {
-        env::split_paths(&paths).any(|path| {
-            let candidate = path.join(command);
-            candidate.is_file()
-                || cfg!(target_os = "windows")
-                    && ["exe", "cmd", "bat"]
-                        .iter()
-                        .any(|extension| candidate.with_extension(extension).is_file())
-        })
+fn executable_file(path: &Path) -> bool {
+    if !path.is_file() {
+        return false;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::metadata(path)
+            .map(|metadata| metadata.permissions().mode() & 0o111 != 0)
+            .unwrap_or(false)
+    }
+    #[cfg(not(unix))]
+    {
+        true
+    }
+}
+
+fn command_path_on_path(command: &str, paths: &OsStr) -> Option<PathBuf> {
+    env::split_paths(paths).find_map(|path| {
+        let candidate = path.join(command);
+        if executable_file(&candidate) {
+            return Some(candidate);
+        }
+        if cfg!(target_os = "windows") {
+            return ["exe", "cmd", "bat"]
+                .iter()
+                .map(|extension| candidate.with_extension(extension))
+                .find(|candidate| executable_file(candidate));
+        }
+        None
     })
+}
+
+fn command_exists_on_path(command: &str, paths: &OsStr) -> bool {
+    command_path_on_path(command, paths).is_some()
+}
+
+fn command_exists(command: &str) -> bool {
+    env::var_os("PATH").is_some_and(|paths| command_exists_on_path(command, &paths))
+}
+
+fn connector_path_in_scope(scope: &LaunchScope) -> Option<PathBuf> {
+    scope
+        .environment
+        .get("PATH")
+        .and_then(|paths| command_path_on_path(&scope.connector, OsStr::new(paths)))
+}
+
+fn connector_exists_in_scope(scope: &LaunchScope) -> bool {
+    connector_path_in_scope(scope).is_some()
 }
 
 /// Apply the complete child environment after clearing every inherited value.
@@ -373,63 +417,179 @@ fn connector_instruction(scope: &LaunchScope) -> String {
     )
 }
 
-#[cfg(target_os = "linux")]
-fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
-    let mut env_args: Vec<String> = scope
-        .environment
-        .iter()
-        .map(|(key, value)| format!("{key}={value}"))
-        .collect();
-    env_args.insert(0, "-i".into());
-    env_args.push(scope.connector.clone());
-    env_args.push(connector_instruction(scope));
-    let candidates: [(&str, &[&str]); 4] = [
-        ("x-terminal-emulator", &["-e", "env"]),
-        ("gnome-terminal", &["--", "env"]),
-        ("konsole", &["-e", "env"]),
-        ("xterm", &["-e", "env"]),
-    ];
-    for (program, prefix) in candidates {
-        let mut command = Command::new(program);
-        command.args(prefix).args(&env_args);
-        apply_scoped_environment(&mut command, scope);
-        if command.spawn().is_ok() {
-            return Ok(());
-        }
-    }
-    Err("No supported terminal was found. Install x-terminal-emulator, GNOME Terminal, Konsole, or xterm.".into())
+const LAUNCH_CONFIRMATION_TIMEOUT: Duration = Duration::from_secs(6);
+
+/// A launch is only delivery provenance after code running inside the isolated
+/// profile has confirmed that the selected connector stayed alive for a short
+/// readiness interval. A terminal process merely being created is not proof.
+struct LaunchFiles {
+    script_path: PathBuf,
+    status_path: PathBuf,
 }
 
-#[cfg(target_os = "macos")]
-fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
-    use std::os::unix::fs::PermissionsExt;
-    fn shell_literal(value: &str) -> String {
-        format!("'{}'", value.replace('\'', "'\"'\"'"))
+fn launch_files(scope: &LaunchScope, extension: &str) -> Result<LaunchFiles, String> {
+    let session_id = scope
+        .environment
+        .get("CCF_SESSION_ID")
+        .ok_or("The scoped session identifier is missing.")?;
+    safe_id(session_id)?;
+    let launches = scope.profile_dir.join("launches");
+    fs::create_dir_all(&launches)
+        .map_err(|error| format!("Could not prepare the launch confirmation: {error}"))?;
+    let status_path = launches.join(format!("{session_id}.status"));
+    if status_path.exists() {
+        fs::remove_file(&status_path)
+            .map_err(|error| format!("Could not clear a previous launch confirmation: {error}"))?;
     }
-    let script = scope.profile_dir.join("open-agent.command");
+    Ok(LaunchFiles {
+        script_path: launches.join(format!("{session_id}.{extension}")),
+        status_path,
+    })
+}
+
+fn read_launch_confirmation(status_path: &Path) -> Result<Option<String>, String> {
+    match fs::read_to_string(status_path) {
+        Ok(value) => Ok(Some(value.trim().to_owned())),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(format!(
+            "Could not read the agent launch confirmation: {error}"
+        )),
+    }
+}
+
+fn wait_for_launch_confirmation(
+    status_path: &Path,
+    terminal: &mut Child,
+    timeout: Duration,
+) -> Result<(), String> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if let Some(confirmation) = read_launch_confirmation(status_path)? {
+            if confirmation == "started" {
+                return Ok(());
+            }
+            return Err(format!(
+                "The selected agent did not start in its client profile. {confirmation}"
+            ));
+        }
+        if let Some(exit) = terminal
+            .try_wait()
+            .map_err(|error| format!("Could not check the terminal launcher: {error}"))?
+        {
+            if !exit.success() {
+                return Err(format!(
+                    "The terminal launcher exited before the selected agent confirmed startup ({exit})."
+                ));
+            }
+        }
+        if Instant::now() >= deadline {
+            return Err(
+                "The selected agent did not confirm startup in its client profile. Check the terminal and agent installation, then try again."
+                    .into(),
+            );
+        }
+        thread::sleep(Duration::from_millis(50));
+    }
+}
+
+#[cfg(unix)]
+fn shell_literal(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "'\"'\"'"))
+}
+
+#[cfg(unix)]
+fn write_unix_launch_script(scope: &LaunchScope) -> Result<LaunchFiles, String> {
+    use std::os::unix::fs::PermissionsExt;
+
+    let files = launch_files(scope, "command")?;
+    let connector_path = connector_path_in_scope(scope).ok_or_else(|| {
+        format!(
+            "{} is not installed, executable, or is no longer on PATH.",
+            scope.connector
+        )
+    })?;
     let env_args = scope
         .environment
         .iter()
         .map(|(key, value)| format!("{key}={}", shell_literal(value)))
         .collect::<Vec<_>>()
         .join(" ");
-    let contents = format!(
-        "#!/bin/sh\ncd {}\nexec /usr/bin/env -i {env_args} {} {}\n",
+    let script_body = format!(
+        "result={}\nfolder={}\nconnector={}\ninstruction={}\nwrite_result() {{ (umask 077; printf '%s\\n' \"$1\" > \"${{result}}.tmp\" && /bin/mv \"${{result}}.tmp\" \"$result\"); }}\nif ! cd \"$folder\"; then\n  write_result 'failed: the saved local folder is no longer available.'\n  exit 1\nfi\nif [ ! -x \"$connector\" ]; then\n  write_result 'failed: the selected agent is no longer executable.'\n  exit 127\nfi\n\"$connector\" \"$instruction\" &\nagent_pid=$!\n/bin/sleep 1\nagent_state=$(/bin/ps -o stat= -p \"$agent_pid\" 2>/dev/null || true)\ncase \"$agent_state\" in\n  *Z*) agent_state='' ;;\nesac\nif /bin/kill -0 \"$agent_pid\" 2>/dev/null && [ -n \"$agent_state\" ]; then\n  write_result started\n  wait \"$agent_pid\"\n  exit $?\nfi\nwait \"$agent_pid\"\nexit_code=$?\nwrite_result \"failed: the selected agent exited before startup confirmation (exit $exit_code).\"\nexit \"$exit_code\"\n",
+        shell_literal(&files.status_path.to_string_lossy()),
         shell_literal(&scope.folder.to_string_lossy()),
-        scope.connector,
-        shell_literal(&connector_instruction(scope))
+        shell_literal(&connector_path.to_string_lossy()),
+        shell_literal(&connector_instruction(scope)),
     );
-    fs::write(&script, contents)
+    let contents = format!(
+        "#!/bin/sh\nexec /usr/bin/env -i {env_args} /bin/sh -c {}\n",
+        shell_literal(&script_body)
+    );
+    fs::write(&files.script_path, contents)
         .map_err(|error| format!("Could not prepare the scoped terminal: {error}"))?;
-    fs::set_permissions(&script, fs::Permissions::from_mode(0o700))
-        .map_err(|error| error.to_string())?;
+    fs::set_permissions(&files.script_path, fs::Permissions::from_mode(0o700))
+        .map_err(|error| format!("Could not protect the scoped terminal: {error}"))?;
+    Ok(files)
+}
+
+#[cfg(target_os = "linux")]
+fn spawn_linux_scope_with_terminals(
+    scope: &LaunchScope,
+    candidates: &[(&Path, &[&str])],
+    timeout: Duration,
+) -> Result<(), String> {
+    if !connector_exists_in_scope(scope) {
+        return Err(format!(
+            "{} is not installed, executable, or is no longer on PATH.",
+            scope.connector
+        ));
+    }
+    let files = write_unix_launch_script(scope)?;
+    for (program, prefix) in candidates {
+        let mut command = Command::new(program);
+        command.args(*prefix).arg(&files.script_path);
+        apply_scoped_environment(&mut command, scope);
+        match command.spawn() {
+            Ok(mut terminal) => {
+                return wait_for_launch_confirmation(&files.status_path, &mut terminal, timeout)
+            }
+            Err(_) => continue,
+        }
+    }
+    Err("No supported terminal was found. Install x-terminal-emulator, GNOME Terminal, Konsole, or xterm.".into())
+}
+
+#[cfg(target_os = "linux")]
+fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
+    let candidates: [(&Path, &[&str]); 4] = [
+        (Path::new("x-terminal-emulator"), &["-e"]),
+        (Path::new("gnome-terminal"), &["--"]),
+        (Path::new("konsole"), &["-e"]),
+        (Path::new("xterm"), &["-e"]),
+    ];
+    spawn_linux_scope_with_terminals(scope, &candidates, LAUNCH_CONFIRMATION_TIMEOUT)
+}
+
+#[cfg(target_os = "macos")]
+fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
+    if !connector_exists_in_scope(scope) {
+        return Err(format!(
+            "{} is not installed, executable, or is no longer on PATH.",
+            scope.connector
+        ));
+    }
+    let files = write_unix_launch_script(scope)?;
     let mut command = Command::new("/usr/bin/open");
-    command.arg(&script);
+    command.arg(&files.script_path);
     apply_scoped_environment(&mut command, scope);
-    command
+    let mut terminal = command
         .spawn()
         .map_err(|error| format!("Could not open Terminal: {error}"))?;
-    Ok(())
+    wait_for_launch_confirmation(
+        &files.status_path,
+        &mut terminal,
+        LAUNCH_CONFIRMATION_TIMEOUT,
+    )
 }
 
 #[cfg(target_os = "windows")]
@@ -437,7 +597,19 @@ fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
     fn ps_literal(value: &str) -> String {
         format!("'{}'", value.replace('\'', "''"))
     }
-    let script = scope.profile_dir.join("open-agent.ps1");
+    if !connector_exists_in_scope(scope) {
+        return Err(format!(
+            "{} is not installed, executable, or is no longer on PATH.",
+            scope.connector
+        ));
+    }
+    let connector_path = connector_path_in_scope(scope).ok_or_else(|| {
+        format!(
+            "{} is not installed, executable, or is no longer on PATH.",
+            scope.connector
+        )
+    })?;
+    let files = launch_files(scope, "ps1")?;
     let exports = scope
         .environment
         .iter()
@@ -445,22 +617,27 @@ fn spawn_scope(scope: &LaunchScope) -> Result<(), String> {
         .collect::<Vec<_>>()
         .join("\r\n");
     let contents = format!(
-        "Get-ChildItem Env: | ForEach-Object {{ Remove-Item -LiteralPath (\"Env:\" + $_.Name) }}\r\n{exports}\r\nSet-Location -LiteralPath {}\r\n& {} {}\r\n",
+        "Get-ChildItem Env: | ForEach-Object {{ Remove-Item -LiteralPath (\"Env:\" + $_.Name) }}\r\n{exports}\r\nSet-Location -LiteralPath {}\r\n$resultPath = {}\r\n$resultTemporary = $resultPath + '.tmp'\r\nfunction Write-LaunchResult([string]$value) {{ Set-Content -LiteralPath $resultTemporary -Value $value -NoNewline; Move-Item -LiteralPath $resultTemporary -Destination $resultPath -Force }}\r\ntry {{\r\n  $agent = Start-Process -FilePath {} -ArgumentList {} -PassThru -NoNewWindow\r\n  Start-Sleep -Seconds 1\r\n  if ($agent.HasExited) {{ Write-LaunchResult (\"failed: the selected agent exited before startup confirmation (exit {{0}}).\" -f $agent.ExitCode); exit $agent.ExitCode }}\r\n  Write-LaunchResult 'started'\r\n  Wait-Process -Id $agent.Id\r\n  exit 0\r\n}} catch {{ Write-LaunchResult (\"failed: the selected agent could not start. {{0}}\" -f $_.Exception.Message); exit 1 }}\r\n",
         ps_literal(&scope.folder.to_string_lossy()),
-        scope.connector,
+        ps_literal(&files.status_path.to_string_lossy()),
+        ps_literal(&connector_path.to_string_lossy()),
         ps_literal(&connector_instruction(scope))
     );
-    fs::write(&script, contents)
+    fs::write(&files.script_path, contents)
         .map_err(|error| format!("Could not prepare the scoped terminal: {error}"))?;
     let mut command = Command::new("powershell.exe");
     command
         .args(["-NoLogo", "-NoExit", "-ExecutionPolicy", "Bypass", "-File"])
-        .arg(&script);
+        .arg(&files.script_path);
     apply_scoped_environment(&mut command, scope);
-    command
+    let mut terminal = command
         .spawn()
         .map_err(|error| format!("Could not open PowerShell: {error}"))?;
-    Ok(())
+    wait_for_launch_confirmation(
+        &files.status_path,
+        &mut terminal,
+        LAUNCH_CONFIRMATION_TIMEOUT,
+    )
 }
 
 #[tauri::command]
@@ -492,6 +669,7 @@ fn launch_scoped_agent(app: AppHandle, request: LaunchRequest) -> Result<LaunchR
     Ok(LaunchReceipt {
         profile_dir: scope.profile_dir.to_string_lossy().into_owned(),
         context_path: scope.environment["CCF_SESSION_CONTEXT_PATH"].clone(),
+        confirmed: true,
     })
 }
 
@@ -605,13 +783,16 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(target_os = "linux")]
+    use super::spawn_linux_scope_with_terminals;
     use super::{
-        apply_scoped_environment, connector_instruction, decrypt, delete_workspace_scope_at,
-        encrypt, launch_scope, prepare_scoped_session_at, vault_key_from_entry,
+        apply_scoped_environment, command_exists_on_path, connector_exists_in_scope,
+        connector_instruction, decrypt, delete_workspace_scope_at, encrypt, launch_scope,
+        prepare_scoped_session_at, vault_key_from_entry, wait_for_launch_confirmation,
         write_session_context, LaunchRequest, RedactionRule, SessionSource,
     };
     use base64::Engine;
-    use std::{env, fs, process::Command};
+    use std::{env, fs, process::Command, time::Duration};
 
     fn request(workspace: &str, folder: &std::path::Path) -> LaunchRequest {
         let source = SessionSource {
@@ -747,6 +928,142 @@ mod tests {
         assert!(error.contains("does not exist"));
         assert!(!base.join("connector-scopes/impossible").exists());
         assert!(!base.join("connector-scopes").exists());
+    }
+
+    #[test]
+    fn launch_confirmation_rejects_missing_and_failed_status() {
+        let base = env::temp_dir().join(format!(
+            "ccf-confirmation-status-test-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(&base).unwrap();
+        let status = base.join("launch.status");
+
+        #[cfg(windows)]
+        let mut missing_child = Command::new("cmd")
+            .args(["/C", "exit", "0"])
+            .spawn()
+            .unwrap();
+        #[cfg(not(windows))]
+        let mut missing_child = Command::new("/bin/true").spawn().unwrap();
+        let missing =
+            wait_for_launch_confirmation(&status, &mut missing_child, Duration::from_millis(1))
+                .unwrap_err();
+        assert!(missing.contains("did not confirm startup"));
+
+        fs::write(&status, "failed: connector stopped immediately\n").unwrap();
+        #[cfg(windows)]
+        let mut failed_child = Command::new("cmd")
+            .args(["/C", "exit", "0"])
+            .spawn()
+            .unwrap();
+        #[cfg(not(windows))]
+        let mut failed_child = Command::new("/bin/true").spawn().unwrap();
+        let failed =
+            wait_for_launch_confirmation(&status, &mut failed_child, Duration::from_millis(1))
+                .unwrap_err();
+        assert!(failed.contains("connector stopped immediately"));
+
+        fs::write(&status, "started\n").unwrap();
+        #[cfg(windows)]
+        let mut started_child = Command::new("cmd")
+            .args(["/C", "exit", "0"])
+            .spawn()
+            .unwrap();
+        #[cfg(not(windows))]
+        let mut started_child = Command::new("/bin/true").spawn().unwrap();
+        assert!(wait_for_launch_confirmation(
+            &status,
+            &mut started_child,
+            Duration::from_millis(1)
+        )
+        .is_ok());
+
+        fs::remove_dir_all(base).unwrap();
+    }
+
+    #[cfg(unix)]
+    fn write_executable(path: &std::path::Path, contents: &str) {
+        use std::os::unix::fs::PermissionsExt;
+        fs::write(path, contents).unwrap();
+        fs::set_permissions(path, fs::Permissions::from_mode(0o700)).unwrap();
+    }
+
+    /// Regression for verification 6 P1: no delivery receipt may be returned
+    /// merely because a terminal wrapper was spawned. The profile script must
+    /// report a live connector; missing, non-executable, and immediately
+    /// failing commands all remain unconfirmed.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn claim_validated_provenance_refuses_failed_launchers_and_connectors() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let base = env::temp_dir().join(format!(
+            "ccf-launch-confirmation-test-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let folder = base.join("project");
+        let bin = base.join("bin");
+        fs::create_dir_all(&folder).unwrap();
+        fs::create_dir_all(&bin).unwrap();
+        let mut scope =
+            launch_scope(&base, &request("northstar", &folder), folder.clone()).unwrap();
+        scope
+            .environment
+            .insert("PATH".into(), bin.to_string_lossy().into_owned());
+
+        assert!(!command_exists_on_path("codex", bin.as_os_str()));
+        assert!(!connector_exists_in_scope(&scope));
+        let missing =
+            spawn_linux_scope_with_terminals(&scope, &[], Duration::from_millis(50)).unwrap_err();
+        assert!(missing.contains("not installed, executable"));
+
+        let connector = bin.join("codex");
+        fs::write(&connector, "#!/bin/sh\nexit 0\n").unwrap();
+        fs::set_permissions(&connector, fs::Permissions::from_mode(0o600)).unwrap();
+        assert!(!command_exists_on_path("codex", bin.as_os_str()));
+        let non_executable =
+            spawn_linux_scope_with_terminals(&scope, &[], Duration::from_millis(50)).unwrap_err();
+        assert!(non_executable.contains("not installed, executable"));
+
+        write_executable(&connector, "#!/bin/sh\nexit 1\n");
+        let failing_terminal = bin.join("terminal-that-exits");
+        write_executable(&failing_terminal, "#!/bin/sh\nexit 1\n");
+        let wrapper_error = spawn_linux_scope_with_terminals(
+            &scope,
+            &[(&failing_terminal, &["-e"])],
+            Duration::from_millis(50),
+        )
+        .unwrap_err();
+        assert!(wrapper_error.contains("terminal launcher exited"));
+
+        let terminal = bin.join("terminal-that-runs-command");
+        write_executable(
+            &terminal,
+            "#!/bin/sh\n[ \"$1\" = \"-e\" ] && shift\nexec \"$@\"\n",
+        );
+        let connector_error = spawn_linux_scope_with_terminals(
+            &scope,
+            &[(&terminal, &["-e"])],
+            Duration::from_secs(2),
+        )
+        .unwrap_err();
+        assert!(connector_error.contains("selected agent did not start"));
+        assert!(connector_error.contains("exited before startup confirmation"));
+        assert!(base
+            .join("connector-scopes/northstar/repo/launches/northstar-session.status")
+            .exists());
+        assert!(!connector_error.contains("started"));
+
+        fs::remove_dir_all(base).unwrap();
     }
 
     #[test]

@@ -42,7 +42,7 @@ Checked 2026-08-29 after polish round 2. Counts are whitespace-delimited and tre
 | H3 | Launch and export | 3 | pass |
 | sentence | Open every selected agent in its client profile, then export the delivery record. | 13 | `scoped-launch`, `provenance-export` |
 | image alt | A clean session passes all boundary checks. | 7 | pass |
-| caption | A delivery record appears after every selected agent opens. | 9 | `validated-provenance` |
+| caption | A delivery record appears after each selected agent confirms startup. | 10 | `validated-provenance` |
 | label | Clear limits | 2 | pass |
 | H2 | What the app checks | 4 | pass |
 | sentence | The desktop app separates each client’s agent credentials and settings in a client profile. | 13 | `scoped-launch` |

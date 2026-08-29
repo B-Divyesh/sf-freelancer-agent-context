@@ -28,10 +28,11 @@ opening an agent, the app removes API keys inherited from its parent process.
 Choose a local project folder, then sign in inside that client profile. Your
 chosen coding agent may use its own online service.
 
-A real delivery record appears only after every selected agent opens from its
-source’s saved local folder. The record names the client profile and confirms
-which agents opened. Demo exports are marked sample data and never claim a
-local launch.
+A real delivery record appears only after every selected agent confirms startup
+from its source’s saved local folder. The record names the client profile and
+confirms which agents started. A terminal wrapper that exits or an agent that
+ends before confirmation cannot create a delivery record. Demo exports are
+marked sample data and never claim a local launch.
 
 Deleting a desktop workspace removes its workspace records and complete client
 profile. Export a workspace backup to move it. Backups omit agent sign-ins,

@@ -1,4 +1,5 @@
 import './style.css';
+import { isConfirmedNativeLaunch, type NativeLaunchReceipt } from './native';
 import { clearDemo, getStorageError, loadState, removeWorkspaceScope, saveState } from './store';
 import { detectPlatform, platformAssets, type ReleaseAsset } from './release';
 import type { AppState, Connector, Source, Workspace } from './types';
@@ -37,7 +38,7 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Keep each client’s work in its own workspace.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a class="nav-link" href="/art-provenance">Art provenance</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.7</p></footer>`;
+  return `<footer><p>Keep each client’s work in its own workspace.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a class="nav-link" href="/art-provenance">Art provenance</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.8</p></footer>`;
 }
 
 function setMeta(title: string, description: string, path: string): void {
@@ -76,7 +77,7 @@ function landing(): void {
         <div class="preview-tabs"><span>NS</span><span class="inactive">JL</span></div><div class="preview-sheet"><p class="stamp">NORTHSTAR / SESSION READY</p><h3>Sources in this session</h3><p>Codex · northstar/reorder <b>client profile</b></p><p>Claude · Wholesale briefs <b>client profile</b></p><ol class="check-list"><li>Client profile is separate</li><li>No other client names found</li><li>Two redaction rules loaded</li></ol></div>
       </div>
     </section>
-    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">How the client check works</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Choose each source</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open every selected agent in its client profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>A delivery record appears after every selected agent opens.</figcaption></figure></li></ol></section>
+    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">How the client check works</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Choose each source</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open every selected agent in its client profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>A delivery record appears after each selected agent confirms startup.</figcaption></figure></li></ol></section>
     <section class="limits" aria-labelledby="limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="limits-title">What the app checks</h2></div><div><p>The desktop app separates each client’s agent credentials and settings in a client profile.</p><p>Your chosen agent may use its own online service.</p><p>The text check catches named clients and redaction terms before launch.</p></div></section>
     <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install the desktop app</h2><p>Choose the package for your system when releases are published.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
     <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">Pro pricing</h2><p class="price"><strong>$19</strong> once</p><p>Pro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Restore Pro license</button><p>Checkout is handled by Sociobot.</p><p><a href="mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund">Request a refund from Sociobot</a></p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
@@ -150,10 +151,10 @@ function renderLedger(active: Workspace, sessions = state.sessions.filter(sessio
   const canExport = latest?.status === 'sample' || completeLaunch;
   const recordLabel = latest?.status === 'sample' ? 'Export sample record' : 'Export latest record';
   const details = sessions.map(session => {
-    const outcome = session.status === 'sample' ? 'sample only' : session.status === 'legacy-unverified' ? 'not verified after update' : `${session.launches.length}/${session.sourceIds.length} agents opened`;
+    const outcome = session.status === 'sample' ? 'sample only' : session.status === 'legacy-unverified' ? 'not verified after update' : `${session.launches.length}/${session.sourceIds.length} agents confirmed`;
     return `<li><span>${new Date(session.startedAt).toLocaleDateString()}</span><b>${session.sourceIds.length} source${session.sourceIds.length === 1 ? '' : 's'} checked</b><small>${outcome}</small></li>`;
   }).join('');
-  return `<h2>Delivery records</h2>${sessions.length ? `<ol>${details}</ol>${canExport ? `<button class="button secondary" id="export-record">${recordLabel} ${icon('export')}</button>` : '<p>Open every checked agent before exporting a verified delivery record.</p>'}` : '<p>No delivery records yet.</p><p>Check the boundary, then open every selected agent to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(rule => escapeHtml(rule.term)).join(' · ')}</p></div>`;
+  return `<h2>Delivery records</h2>${sessions.length ? `<ol>${details}</ol>${canExport ? `<button class="button secondary" id="export-record">${recordLabel} ${icon('export')}</button>` : '<p>Open every checked agent and wait for confirmation before exporting a verified delivery record.</p>'}` : '<p>No delivery records yet.</p><p>Check the boundary, then open every selected agent to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(rule => escapeHtml(rule.term)).join(' · ')}</p></div>`;
 }
 
 function workspaceDialog(): string {
@@ -310,7 +311,7 @@ async function runPreflight(event: Event): Promise<void> {
     (result.firstElementChild as HTMLElement).focus(); return;
   }
   preparedSession = { id: sessionId, workspaceId: active.id, sourceIds, checks: ['Each selected source has a validated client profile', ...checks], requests, profileDirs: new Map() };
-  result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">BOUNDARY PREPARED</p><h3>Open every checked agent for ${escapeHtml(active.name)}</h3><ul>${preparedSession.checks.map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><div class="launch-actions">${selected.map(source => `<button class="button secondary" type="button" data-launch-source="${escapeHtml(source.id)}">Open ${escapeHtml(source.connector)} for ${escapeHtml(source.label)}</button>`).join('')}</div><p class="launch-help">Each agent receives this saved brief, writing rule, redaction rules, and checked text through its client profile. A delivery record is available after every selected agent opens.</p><div class="launch-status" aria-live="polite"></div></section>`;
+  result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">BOUNDARY PREPARED</p><h3>Open every checked agent for ${escapeHtml(active.name)}</h3><ul>${preparedSession.checks.map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><div class="launch-actions">${selected.map(source => `<button class="button secondary" type="button" data-launch-source="${escapeHtml(source.id)}">Open ${escapeHtml(source.connector)} for ${escapeHtml(source.label)}</button>`).join('')}</div><p class="launch-help">Each agent receives this saved brief, writing rule, redaction rules, and checked text through its client profile. A delivery record is available after every selected agent confirms startup.</p><div class="launch-status" aria-live="polite"></div></section>`;
   document.querySelectorAll<HTMLButtonElement>('[data-launch-source]').forEach(button => button.addEventListener('click', () => launchScopedAgent(button.dataset.launchSource!, button)));
   (result.firstElementChild as HTMLElement).focus();
 }
@@ -327,7 +328,8 @@ async function launchScopedAgent(sourceId: string, button: HTMLButtonElement): P
   if (statusNode) statusNode.textContent = `Opening ${source.connector} in the ${workspace.name} profile…`;
   try {
     const { invoke } = await import('@tauri-apps/api/core');
-    const receipt = await invoke<{ profileDir: string; contextPath: string }>('launch_scoped_agent', { request });
+    const receipt = await invoke<NativeLaunchReceipt>('launch_scoped_agent', { request });
+    if (!isConfirmedNativeLaunch(receipt)) throw new Error('The selected agent did not confirm startup in its client profile.');
     pending.profileDirs.set(sourceId, receipt.profileDir);
     const nextState = structuredClone(state); const existing = nextState.sessions.find(session => session.id === pending.id);
     const launch = { sourceId, connector: source.connector, profileDir: receipt.profileDir, contextPath: receipt.contextPath, launchedAt: new Date().toISOString() };
@@ -335,10 +337,10 @@ async function launchScopedAgent(sourceId: string, button: HTMLButtonElement): P
     else nextState.sessions.unshift({ id: pending.id, workspaceId: workspace.id, startedAt: new Date().toISOString(), sourceIds: pending.sourceIds, checks: pending.checks, status: 'launched', launches: [launch] });
     await saveState(nextState, false); state = nextState;
     const completed = pending.sourceIds.every(id => state.sessions.find(session => session.id === pending.id)?.launches.some(item => item.sourceId === id));
-    if (statusNode) statusNode.textContent = completed ? `${source.connector} opened. Every selected agent opened, and the delivery record is ready.` : `${source.connector} opened. Open the remaining checked agents before exporting the delivery record.`;
+    if (statusNode) statusNode.textContent = completed ? `${source.connector} confirmed startup. Every selected agent is confirmed, and the delivery record is ready.` : `${source.connector} confirmed startup. Open the remaining checked agents before exporting the delivery record.`;
     const ledger = document.querySelector<HTMLElement>('.ledger'); if (ledger) { ledger.innerHTML = renderLedger(workspace); document.querySelector('#export-record')?.addEventListener('click', exportLatest); }
   } catch (error) {
-    if (statusNode) statusNode.textContent = `The agent did not open. ${String(error)} Check the folder and install ${source.connector}, then try again.`;
+    if (statusNode) statusNode.textContent = `The agent did not open. ${String(error)} Check the folder, terminal, and ${source.connector} installation, then try again.`;
   } finally { button.disabled = false; }
 }
 
@@ -346,7 +348,7 @@ function exportLatest(): void {
   const active = state.workspaces.find(w => w.id === state.activeId)!; const session = state.sessions.find(s => s.workspaceId === active.id); if (!session) return;
   const completeLaunch = session.status === 'launched' && session.sourceIds.every(sourceId => session.launches.some(launch => launch.sourceId === sourceId));
   if (session.status !== 'sample' && !completeLaunch) return;
-  const record = { product: 'Client Context Firewall', client: active.name, createdAt: session.startedAt, status: session.status, sources: active.sources.filter(s => session.sourceIds.includes(s.id)).map(({label, account, kind}) => ({kind,label,account})), checks: session.checks, launches: session.launches, statement: session.status === 'sample' ? 'Sample data only. No local folder, client profile, or agent launch was validated.' : 'This record confirms the client profile and agent launches. It is not a guarantee against data loss.' };
+  const record = { product: 'Client Context Firewall', client: active.name, createdAt: session.startedAt, status: session.status, sources: active.sources.filter(s => session.sourceIds.includes(s.id)).map(({label, account, kind}) => ({kind,label,account})), checks: session.checks, launches: session.launches, statement: session.status === 'sample' ? 'Sample data only. No local folder, client profile, or agent launch was validated.' : 'This record confirms the client profile and agent startup confirmation. It is not a guarantee against data loss.' };
   const blob = new Blob([JSON.stringify(record, null, 2)], {type:'application/json'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${active.code.toLowerCase()}-delivery-record.json`; link.click(); URL.revokeObjectURL(link.href);
 }
 
