@@ -1,8 +1,32 @@
 {
   "slug": "freelancer-agent-context",
   "title": "Client Context Firewall",
-  "summary": "Keep each client’s sources, rules, and delivery record in one local workspace.",
+  "summary": "Keep each client’s sources, rules, and delivery records in a separate local workspace.",
+  "territory": "devtools-data",
+  "user": "Freelance developers juggling client engagements with AI tools who need to preserve their own voice while preventing context, accounts, and deliverables from bleeding between clients.",
+  "evidence": [
+    {
+      "url": "https://hn.algolia.com/api/v1/items/49481969",
+      "date": "2026-08-28",
+      "quote_or_summary": "A freelancer says AI-assisted speed has reset market expectations and asks how to retain professional identity."
+    },
+    {
+      "url": "https://github.com/anthropics/claude-code/issues/27302",
+      "date": "2026-02-21",
+      "quote_or_summary": "A 505-reaction feature request asks for multiple accounts for the same connector in Claude and Claude Code."
+    }
+  ],
+  "recurrence": "A freelancer-facing identity concern and a 505-reaction multi-account request point to the same recurring multi-context workflow problem.",
+  "current_workaround": "Separate browser profiles, manually swap API keys, keep notes in disconnected folders, and hope the active chat has the right client context.",
+  "incumbents_and_gap": "1Password, browser profiles, and vendor workspaces separate logins but do not bind a client brief, allowed sources, style guide, connectors, and final delivery trail into an agent session boundary.",
+  "smallest_useful_product": "Desktop companion that launches named client workspaces with scoped connectors, encrypted local context bundles, redaction rules, and a deliverable provenance export. Non-goals: employee surveillance, hosted source-code storage, or a new IDE.",
+  "success_measure": "Ten freelancers complete 30 client sessions with zero cross-client connector use and report a 25% reduction in setup time.",
   "artifact_class": "desktop-app",
-  "monetization": "one-time purchase — $19",
-  "success_measure": "Ten freelancers complete 30 client sessions with zero cross-client connector use and report a 25% reduction in setup time."
+  "monetization": "Subscription — Independent at $19/month, with a useful Free tier.",
+  "constraints": "Client data must remain device-local by default; clear keychain integration; no claims of absolute data-loss prevention; support export/deletion for offboarding.",
+  "est_build_effort": "L",
+  "scale": "venture",
+  "why_distinct": "It protects the working boundary of a client engagement rather than being a generic AI chat organizer.",
+  "confidence": 4,
+  "state": "PLANNED"
 }

@@ -1,26 +1,44 @@
 [
-  {"id":"demo-isolation","claim":"Demo changes never touch real workspace data.","where":"demo banner and README","test":"npm run test:e2e -- --grep @claim:demo-isolation","sandbox":"fresh browser; seed a real sentinel; enter through the one-click ?demo=1 action; change and reset sample data; leave for real; assert only session storage changed and was discarded"},
-  {"id":"boundary-check","claim":"The preflight blocks another client name or a configured redaction term.","where":"live preview and README","test":"npm run test:e2e -- --grep @claim:boundary-check","sandbox":"sample Northstar workspace; enter Juniper Legal; assert the foreign-client and configured-term blocks"},
-  {"id":"scoped-launch","claim":"The desktop starts supported agents with no inherited provider credentials and a separate client profile.","where":"landing preview, privacy page, and README","test":"cargo test --manifest-path src-tauri/Cargo.toml tests::claim_scoped_launch -- --exact","sandbox":"one exact Rust test builds isolated plans for every supported agent; launches a child with client-A API-key sentinels; asserts no sentinel reaches it and the selected client context does"},
-  {"id":"session-context-retention","claim":"The desktop saves each checked context in its client profile until the workspace is deleted.","where":"Privacy page and README","test":"cargo test --manifest-path src-tauri/Cargo.toml tests::claim_session_context_retention -- --exact","sandbox":"create an isolated client profile and checked context; assert it is private and readable in that profile; delete the workspace and assert the context and complete profile are gone"},
-  {"id":"provenance-export","claim":"The demo exports a clearly marked sample record with each checked source.","where":"How it works and README","test":"npm run test:e2e -- --grep @claim:provenance-export","sandbox":"complete a sample session; download JSON; assert client, source count, sample status, no launch receipt, and simulated-data statement"},
-  {"id":"validated-provenance","claim":"A real delivery record is unavailable until its local folder, client profile, and agent startup are confirmed.","where":"workspace delivery ledger and README","test":"cargo test --manifest-path src-tauri/Cargo.toml tests::claim_validated_provenance_refuses_failed_launchers_and_connectors -- --exact","sandbox":"isolated Linux profile with missing, non-executable, immediately failing connector, and immediately failing terminal wrapper fixtures; assert every launch returns an error and no success receipt exists"},
-  {"id":"device-local","claim":"The browser workspace does not send workspace data off-origin.","where":"landing facts, privacy page, and README","test":"npm run test:e2e -- --grep @claim:device-local","sandbox":"fresh real browser workspace; create and check a client; assert no request leaves the product origin"},
-  {"id":"offline-reload","claim":"Works offline after the first visit.","where":"landing facts, README, and app offline state","test":"npm run test:e2e -- --grep @claim:offline-reload","sandbox":"load demo; wait for service worker; go offline; reload and assert the session screen"},
-  {"id":"offline-update","claim":"A new release replaces the previous cached application shell.","where":"README","test":"npm run test:e2e -- --grep @claim:offline-update","sandbox":"install a legacy cache-first worker; install current worker at the same scope; assert old cache removal and current shell"},
-  {"id":"plan-limit","claim":"Free allows two workspaces; Pro allows more than two.","where":"landing facts, pricing, terms, and README","test":"npm run test:e2e -- --grep @claim:plan-limit","sandbox":"fresh real namespace; create two; assert third is blocked; add cached valid license verdict; create third"},
-  {"id":"free-core","claim":"Checks and delivery exports remain available on the free plan.","where":"pricing, terms, and README","test":"npm run test:e2e -- --grep @claim:free-core","sandbox":"fresh demo without a license; complete a check and download the delivery record"},
-  {"id":"paid-checkout","claim":"Buy Pro starts a hosted Sociobot checkout for a $19 one-time purchase.","where":"brief, pricing, terms, and README","test":"npm run test:e2e -- --grep @claim:paid-checkout","sandbox":"assert the brief states a $19 one-time purchase; request the live checkout; assert HTTP 303 from Sociobot to Dodo, then assert the hosted page states $19.00 and One-time Pro license"},
-  {"id":"license-verification","claim":"License verification sends only the license token to Sociobot.","where":"privacy page","test":"npm run test:e2e -- --grep @claim:license-verification","sandbox":"record the verification request against a valid fixture response; assert its origin, path, sole query field, GET method, and empty body"},
-  {"id":"license-portability","claim":"A valid Pro license can be restored in another browser or device.","where":"terms and Restore Pro license action","test":"npm run test:e2e -- --grep @claim:license-portability","sandbox":"two fresh browser contexts restore the same token against a recorded valid Sociobot response; assert each context independently activates Pro"},
-  {"id":"revoked-license","claim":"A revoked license stops new Pro workspace creation while existing workspace tools remain available.","where":"terms and license notice","test":"npm run test:e2e -- --grep @claim:revoked-license","sandbox":"seed three existing workspaces and a stale valid verdict; return a recorded revoked response; assert the workspaces, checks, and export remain while another workspace is refused"},
-  {"id":"encrypted-vault","claim":"The desktop workspace file uses AES-256-GCM authenticated encryption.","where":"Privacy page and README","test":"cargo test --manifest-path src-tauri/Cargo.toml tests::claim_encrypted_vault_file -- --exact","sandbox":"create a random device key, encrypt and write a workspace fixture, assert the stored file has no plaintext, then decrypt it with the same key and reject another key"},
-  {"id":"platform-install","claim":"The download selects the Mac architecture, and the Linux script installs a verified executable on PATH.","where":"download panel and README","test":"npm run test:unit -- --run -t @claim:platform-install","sandbox":"fixture release assets for Intel and arm64 Macs; mock the GitHub release for Linux; assert correct DMG selection, checksum verification, install path, and executable mode"},
-  {"id":"workspace-deletion","claim":"Deleting a desktop workspace removes its complete client profile.","where":"workspace delete confirmation, privacy page, and README","test":"cargo test --manifest-path src-tauri/Cargo.toml tests::deleting_workspace_removes_its_connector_scope_and_credentials -- --exact","sandbox":"create two client profile trees with credential fixtures; delete one; assert its complete tree is gone and the other remains"},
-  {"id":"workspace-backup","claim":"A workspace backup omits agent sign-ins, license data, and delivery records, and requires folder-path confirmation before import.","where":"workspace export and import, Privacy page, and README","test":"npm run test:e2e -- --grep @claim:workspace-backup","sandbox":"seed a workspace, account reminder, license token and verdict, and delivery record; export and assert all three private categories are absent; import and assert folder-path confirmation is required"},
-  {"id":"art-provenance","claim":"The art provenance page identifies the shipped artwork and its source record.","where":"footer and art provenance page","test":"npm run test:unit -- --run -t @claim:art-provenance","sandbox":"read the source record and assert the referenced source PNG and shipped derivatives exist"},
-  {"id":"refund-route","claim":"A refund request link opens an addressed Sociobot support message.","where":"pricing and terms","test":"npm run test:unit -- --run -t @claim:refund-route","sandbox":"render source strings and assert the refund mailto link targets support@sociobot.in with a product-specific subject"},
-  {"id":"release-request-disclosure","claim":"The landing page asks only GitHub for public release details and sends no workspace data.","where":"privacy page","test":"npm run test:e2e -- --grep @claim:release-request-disclosure","sandbox":"fresh landing page with a workspace sentinel; record all outgoing requests; assert one delayed GitHub GET and no workspace content"},
-  {"id":"hosting-routes","claim":"Every public route opens directly with security headers, and unknown routes return the designed 404.","where":"README routes and hosting configuration","test":"npm run test:e2e -- --grep @claim:hosting-routes","sandbox":"production-equivalent static server; read the sitemap; request every listed route and an unknown route; assert statuses, CSP, nosniff, and referrer policy"},
-  {"id":"site-build-output","claim":"The site build creates dist/site with the required pages and public assets within the JavaScript budget.","where":"README build instructions","test":"npm run test:unit -- --run -t @claim:site-build-output","sandbox":"run the production site build; assert index, 404, hosting config, service worker, sitemap, robots, and installers exist; total emitted JavaScript is at most 200 KB"}
+  {
+    "id": "demo-isolation",
+    "claim": "Demo changes never touch real workspace data.",
+    "where": "demo banner, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser; seed a real sentinel, enter /demo, change and reset sample data, leave for real, and assert the real sentinel is unchanged"
+  },
+  {
+    "id": "boundary-check",
+    "claim": "The preflight blocks another client name or a configured redaction term.",
+    "where": "landing preview, demo result, README",
+    "test": "npm run test:e2e -- --grep @claim:boundary-check",
+    "sandbox": "fresh /demo state; use Northstar Coffee, enter Juniper Legal and a configured term, and assert the matching checks block the session"
+  },
+  {
+    "id": "provenance-export",
+    "claim": "The demo exports a clearly marked sample record with each checked source.",
+    "where": "how it works, demo delivery ledger, README",
+    "test": "npm run test:e2e -- --grep @claim:provenance-export",
+    "sandbox": "fresh /demo state; complete a clean sample check, download JSON, and assert sample status, every selected source, checks, and no real launch receipt"
+  },
+  {
+    "id": "device-local",
+    "claim": "The browser workspace does not send workspace data off-origin.",
+    "where": "landing facts, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:device-local",
+    "sandbox": "fresh browser context; record every request while creating and checking a workspace and assert workspace data never leaves the product origin"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "landing facts, demo offline state, README",
+    "test": "npm run test:e2e -- --grep @claim:offline-reload",
+    "sandbox": "fresh browser context; load /demo, wait for the service worker, go offline, reload, and assert the seeded session remains usable"
+  },
+  {
+    "id": "hosting-routes",
+    "claim": "Every public route opens directly with security headers, and unknown routes return the designed 404.",
+    "where": "site behavior and handoff",
+    "test": "npm run test:e2e -- --grep @claim:hosting-routes",
+    "sandbox": "built preview; open every M1 route directly, inspect required headers, and assert an unknown path returns the designed 404 with a home action"
+  }
 ]
