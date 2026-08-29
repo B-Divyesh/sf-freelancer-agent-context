@@ -1,6 +1,6 @@
 [package]
 name = "client-context-firewall"
-version = "0.1.6"
+version = "0.1.7"
 description = "A local client boundary for freelance developers"
 authors = ["Param Factory"]
 license = "MIT"

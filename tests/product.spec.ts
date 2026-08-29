@@ -353,7 +353,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.6']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.7']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);
@@ -369,6 +369,11 @@ test('mobile demo remains usable at 390 pixels', async ({ page }) => {
     expect(box?.width, await targets.nth(index).textContent() ?? '').toBeGreaterThanOrEqual(44);
     expect(box?.height, await targets.nth(index).textContent() ?? '').toBeGreaterThanOrEqual(44);
   }
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await expect(page.getByRole('heading', {name:'Check this client session'})).toBeVisible();
+  await expect(page.getByRole('button', {name:'Reset demo'})).toBeVisible();
+  await expect(page.getByRole('link', {name:'Start for real'})).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test('mobile first screen states the job, next action, and plan facts without overflow', async ({page}) => {
