@@ -6,8 +6,9 @@ Client Context Firewall is for freelance developers who switch clients while
 using coding agents. The desktop app validates each local folder, then opens
 each agent with a separate client profile. A client profile is one sign-in and
 settings folder for one client. It checks other client names and redaction
-terms before launch. The app gives the launched agent the saved brief, writing
-rule, redaction rules, and checked text. It uses a temporary file on this device.
+terms before launch. Each checked context includes the saved brief, writing
+rule, redaction rules, and checked text. The app keeps it in the client profile
+until you delete that workspace.
 
 ## Try the isolated demo
 
@@ -19,9 +20,9 @@ any time.
 
 ## Privacy and limits
 
-The desktop app encrypts its local workspace file with AES-256-GCM. Its random
-key is stored in the operating system credential manager. The browser preview
-stores workspaces in this browser and sends no workspace data to another site.
+The desktop app uses AES-256-GCM authenticated encryption for its local
+workspace file. The browser preview stores workspaces in this browser and
+sends no workspace data to another site.
 
 The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. Before
 opening an agent, the app removes API keys inherited from its parent process.
@@ -63,7 +64,8 @@ npm run build
 
 Use `npm run build` to create the static site. Run
 `npm run tauri -- build` for the desktop package on a supported host. On Linux,
-install the Tauri 2 system packages, `libsecret-1-dev`, `libfuse2`, `file`, and `rpm`.
+install the Tauri 2 system packages, `libgtk-3-dev`, `libsecret-1-dev`,
+`libfuse2`, `file`, and `rpm`.
 To publish desktop assets, push a `v*` tag through the included GitHub Actions
 workflow. The landing page separates Intel and Apple silicon downloads. On Linux, run
 `curl -fsSL https://freelancer-agent-context.sociobot.in/install.sh | sh` to

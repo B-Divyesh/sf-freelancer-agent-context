@@ -699,9 +699,19 @@ fn vault_key_from_entry(entry: &keyring::Entry) -> Result<[u8; 32], String> {
     Ok(key)
 }
 
-fn vault_key() -> Result<[u8; 32], String> {
-    let entry = keyring::Entry::new(SERVICE, ACCOUNT).map_err(|error| error.to_string())?;
+fn vault_key_for_service(service: &str) -> Result<[u8; 32], String> {
+    let entry = keyring::Entry::new(service, ACCOUNT).map_err(|error| error.to_string())?;
     vault_key_from_entry(&entry)
+}
+
+fn delete_vault_key_for_service(service: &str) {
+    if let Ok(entry) = keyring::Entry::new(service, ACCOUNT) {
+        let _ = entry.delete_credential();
+    }
+}
+
+fn vault_key() -> Result<[u8; 32], String> {
+    vault_key_for_service(SERVICE)
 }
 
 fn encrypt(contents: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
@@ -751,9 +761,7 @@ fn delete_vault(app: AppHandle) -> Result<(), String> {
     if path.exists() {
         fs::remove_file(path).map_err(|error| error.to_string())?;
     }
-    if let Ok(entry) = keyring::Entry::new(SERVICE, ACCOUNT) {
-        let _ = entry.delete_credential();
-    }
+    delete_vault_key_for_service(SERVICE);
     Ok(())
 }
 
@@ -823,7 +831,7 @@ mod tests {
     }
 
     #[test]
-    fn encrypted_vault_round_trips_and_rejects_another_key() {
+    fn claim_encrypted_vault_file() {
         let credential = keyring::mock::default_credential_builder()
             .build(None, "test-service", "test-user")
             .unwrap();
@@ -839,13 +847,25 @@ mod tests {
         );
         assert_eq!(vault_key_from_entry(&entry).unwrap(), key);
         let other_key = [8u8; 32];
-        let encrypted = encrypt(br#"{\"client\":\"Northstar\"}"#, &key).unwrap();
-        assert_ne!(&encrypted[12..], br#"{\"client\":\"Northstar\"}"#);
-        assert_eq!(
-            decrypt(&encrypted, &key).unwrap(),
-            br#"{\"client\":\"Northstar\"}"#
-        );
-        assert!(decrypt(&encrypted, &other_key).is_err());
+        let contents = br#"{\"client\":\"Northstar\"}"#;
+        let encrypted = encrypt(contents, &key).unwrap();
+        let vault_path = env::temp_dir().join(format!(
+            "ccf-encrypted-vault-test-{}-{}.vault",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::write(&vault_path, &encrypted).unwrap();
+        let stored_vault = fs::read(&vault_path).unwrap();
+        assert_ne!(&stored_vault[12..], contents);
+        assert!(!stored_vault
+            .windows(contents.len())
+            .any(|bytes| bytes == contents));
+        assert_eq!(decrypt(&stored_vault, &key).unwrap(), contents);
+        assert!(decrypt(&stored_vault, &other_key).is_err());
+        fs::remove_file(vault_path).unwrap();
     }
 
     fn assert_scoped_launch_separates_connector_credentials() {
@@ -914,6 +934,44 @@ mod tests {
         assert!(output.contains("CLIENT_SECRET"));
         assert!(output.contains("The checked draft is safe to deliver."));
         assert!(context_path.exists());
+        fs::remove_dir_all(base).unwrap();
+    }
+
+    /// The context is deliberately retained inside its client profile so the
+    /// prepared launch can re-read exactly what was checked. Deleting that
+    /// workspace removes the profile and every retained checked context.
+    #[test]
+    fn claim_session_context_retention() {
+        let base = env::temp_dir().join(format!(
+            "ccf-context-retention-test-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let folder = base.join("project");
+        fs::create_dir_all(&folder).unwrap();
+        let request = request("northstar", &folder);
+        let scope = launch_scope(&base, &request, folder).unwrap();
+        let context_path = write_session_context(&scope, &request).unwrap();
+
+        assert!(context_path.exists());
+        let contents = fs::read_to_string(&context_path).unwrap();
+        assert!(contents.contains("Ship the checked client change."));
+        assert!(contents.contains("The checked draft is safe to deliver."));
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                fs::metadata(&context_path).unwrap().permissions().mode() & 0o777,
+                0o600
+            );
+        }
+
+        delete_workspace_scope_at(&base, "northstar").unwrap();
+        assert!(!context_path.exists());
+        assert!(!base.join("connector-scopes/northstar").exists());
         fs::remove_dir_all(base).unwrap();
     }
 

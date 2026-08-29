@@ -34,6 +34,20 @@ test('@claim:release-request-disclosure landing discloses its only off-origin re
   expect(JSON.stringify(externalRequests)).not.toContain('workspace-sentinel');
 });
 
+test('external download and checkout links name their destinations', async ({page}) => {
+  await page.route('https://api.github.com/repos/B-Divyesh/sf-freelancer-agent-context/releases?per_page=1', route => route.fulfill({json: [{assets: [{
+    name:'Client.Context.Firewall_0.1.10_amd64.AppImage',
+    browser_download_url:'https://github.com/B-Divyesh/sf-freelancer-agent-context/releases/download/v0.1.10/Client.Context.Firewall_0.1.10_amd64.AppImage'
+  }]}]}));
+  await page.goto('/');
+  const download = page.getByRole('link', {name:'Download for Linux from GitHub (external site)'});
+  await expect(download).toBeVisible({timeout: 5_000});
+  await expect(download).toHaveAttribute('rel', 'external');
+  const checkout = page.getByRole('link', {name:'Buy Pro on Sociobot (external site)'});
+  await expect(checkout).toHaveAttribute('href', /api\.sociobot\.in\/api\/v1\/products\/freelancer-agent-context\/checkout$/);
+  await expect(checkout).toHaveAttribute('rel', 'external');
+});
+
 test('all routes are console-clean with one heading and no serious accessibility issues', async ({page}) => {
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];
@@ -353,7 +367,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.9']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.10']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);
@@ -394,7 +408,7 @@ test('routes announce and focus their heading while Back restores scroll', async
   await page.getByRole('link', {name:'Privacy'}).first().click();
   await expect(page).toHaveURL(/\/privacy$/);
   await expect(page.locator('h1')).toBeFocused();
-  await expect(page.locator('#route-status')).toHaveText('Your client data stays under your control');
+  await expect(page.locator('#route-status')).toHaveText('Privacy: what the app stores and sends');
   await page.goBack();
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeFocused();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(before - 5);
@@ -415,7 +429,7 @@ test('workspace tabs support arrow, Home, and End keys', async ({page}) => {
   await expect(juniper).toBeFocused();
 });
 
-test('@claim:workspace-backup omits sign-ins and requires folder confirmation before import', async ({page}) => {
+test('@claim:workspace-backup omits sign-ins, license data, and delivery records before import', async ({page}) => {
   await page.goto('/app');
   await page.getByRole('button', {name:'Create a workspace'}).click();
   await page.getByLabel('Client name').fill('Acorn');
@@ -426,13 +440,34 @@ test('@claim:workspace-backup omits sign-ins and requires folder confirmation be
   await page.getByLabel('Account reminder').fill('acorn@example.test');
   await page.getByLabel('First redaction term').fill('ACORN_KEY');
   await page.getByRole('button', {name:'Save workspace'}).click();
+  await page.evaluate(() => {
+    const key = 'ccf:workspace-state';
+    const saved = JSON.parse(localStorage.getItem(key) ?? '{}');
+    saved.sessions = [{
+      id:'delivery-record-sentinel', workspaceId:saved.activeId, startedAt:'2026-08-29T00:00:00.000Z',
+      sourceIds:[saved.workspaces[0].sources[0].id], checks:['delivery-record-sentinel'], status:'launched',
+      launches:[{sourceId:saved.workspaces[0].sources[0].id, connector:'codex', profileDir:'/profiles/acorn', contextPath:'/profiles/acorn/context.json', launchedAt:'2026-08-29T00:00:01.000Z'}]
+    }];
+    localStorage.setItem(key, JSON.stringify(saved));
+    localStorage.setItem('sb_license:freelancer-agent-context', 'license-token-sentinel');
+    localStorage.setItem('sb_license_verdict:freelancer-agent-context', JSON.stringify({valid:true, token:'license-verdict-sentinel', checkedAt:Date.now()}));
+  });
+  await page.reload();
   await page.getByRole('button', {name:'Import workspace'}).click();
   await expect(page.getByRole('heading', {name:'Import a workspace backup'})).toBeVisible();
   await page.keyboard.press('Escape');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', {name:'Export workspace'}).click();
   const download = await downloadPromise; const backupPath = await download.path();
-  expect(JSON.parse(await import('node:fs/promises').then(fs => fs.readFile(backupPath!, 'utf8'))).workspace.sources[0].account).toBeUndefined();
+  const backupText = await import('node:fs/promises').then(fs => fs.readFile(backupPath!, 'utf8'));
+  const backup = JSON.parse(backupText);
+  expect(backup.workspace.sources[0].account).toBeUndefined();
+  expect(backup.sessions).toBeUndefined();
+  expect(backup.license).toBeUndefined();
+  expect(backupText).not.toContain('acorn@example.test');
+  expect(backupText).not.toContain('license-token-sentinel');
+  expect(backupText).not.toContain('license-verdict-sentinel');
+  expect(backupText).not.toContain('delivery-record-sentinel');
   await page.evaluate(() => localStorage.removeItem('ccf:workspace-state'));
   await page.reload();
   await page.getByRole('button', {name:'Import workspace'}).click();

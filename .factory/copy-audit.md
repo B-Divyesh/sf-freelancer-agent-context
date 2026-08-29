@@ -1,6 +1,6 @@
 # Landing copy audit
 
-Checked 2026-08-29 after polish round 2. Counts are whitespace-delimited and treat hyphenated terms as one word.
+Checked 2026-08-29 after polish round 3. Counts are whitespace-delimited and treat hyphenated terms as one word.
 
 | Kind | Exact copy | Words | Result |
 | --- | --- | ---: | --- |
@@ -52,18 +52,19 @@ Checked 2026-08-29 after polish round 2. Counts are whitespace-delimited and tre
 | H2 | Install the desktop app | 4 | pass |
 | sentence | Choose the package for your system when releases are published. | 10 | pass |
 | status | Checking the latest release… | 4 | pass |
-| action | Download for Linux, macOS, or Windows | 6 | `platform-install` |
+| action | Download for Linux, macOS, or Windows from GitHub (external site) | 10 | `platform-install` |
+| action | Download Apple silicon or Intel build from GitHub (external site) | 10 | `platform-install` |
 | instruction | One-step install: curl -fsSL https://freelancer-agent-context.sociobot.in/install.sh \| sh | 7 | `platform-install` |
 | sentence | For a direct AppImage download, run chmod +x before opening it. | 10 | pass |
 | sentence | Choose Apple silicon or Intel when both builds are listed. | 10 | `platform-install` |
 | fallback | Downloads are being published. | 4 | pass |
-| action | Open the release page | 4 | pass |
+| action | Open the GitHub release page (external site) | 7 | pass |
 | label | Pro license | 2 | pass |
 | H2 | Pro pricing | 2 | pass |
 | price | $19 once | 2 | `paid-checkout` |
 | sentence | Pro lets you create more than two workspaces. | 8 | `plan-limit` |
 | sentence | Checks and delivery exports remain available on the free plan. | 10 | `free-core` |
-| action | Buy Pro | 2 | `paid-checkout` |
+| action | Buy Pro on Sociobot (external site) | 6 | `paid-checkout` |
 | action | Restore Pro license | 3 | `license-portability` |
 | sentence | Checkout is handled by Sociobot. | 5 | `paid-checkout` |
 | action | Request a refund from Sociobot | 5 | `refund-route` |

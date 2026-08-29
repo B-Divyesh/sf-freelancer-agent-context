@@ -1,1 +1,1 @@
-Keep each client’s sources, rules, and agent sessions in one local workspace.
+Keep each client’s sources, rules, and delivery records in a separate local workspace.
