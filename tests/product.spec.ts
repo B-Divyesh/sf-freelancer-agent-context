@@ -28,7 +28,7 @@ test('all routes are console-clean with one heading and no serious accessibility
   const pageErrors: string[] = [];
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
   page.on('pageerror', error => pageErrors.push(error.message));
-  for (const path of ['/', '/demo', '/privacy', '/terms', '/not-a-page']) {
+  for (const path of ['/', '/demo', '/app', '/privacy', '/terms']) {
     await page.goto(path);
     await expect(page.locator('h1')).toHaveCount(1);
     const results = await new AxeBuilder({page: page as never}).analyze();
@@ -36,6 +36,23 @@ test('all routes are console-clean with one heading and no serious accessibility
   }
   expect(consoleErrors).toEqual([]);
   expect(pageErrors).toEqual([]);
+});
+
+test('light and dark themes have no serious accessibility issues', async ({page}) => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({colorScheme});
+    for (const path of ['/', '/demo']) {
+      await page.goto(path);
+      const results = await new AxeBuilder({page: page as never}).analyze();
+      expect(results.violations.filter(item => ['serious','critical'].includes(item.impact ?? '')), `${colorScheme} ${path}`).toEqual([]);
+    }
+  }
+});
+
+test('unknown routes return HTTP 404 with the designed not-found screen', async ({page}) => {
+  const response = await page.goto('/not-a-real-page');
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', {name:'This page crossed the wrong boundary'})).toBeVisible();
 });
 
 test('cold-load keyboard order starts with the skip link', async ({ page }) => {
@@ -85,13 +102,37 @@ test('@claim:provenance-export exports the checked source record', async ({ page
   await page.goto('/demo');
   await page.getByRole('button', {name:/Check boundary/}).click();
   await expect(page.getByText('Session ready for Northstar Coffee')).toBeVisible();
-  await page.reload();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', {name:/Export latest record/}).click();
   const download = await downloadPromise; const path = await download.path();
   expect(download.suggestedFilename()).toBe('ns-delivery-record.json');
   const content = await import('node:fs/promises').then(fs => fs.readFile(path!, 'utf8')); const record = JSON.parse(content);
   expect(record.client).toBe('Northstar Coffee'); expect(record.sources).toHaveLength(1); expect(record.checks).toHaveLength(3);
+});
+
+test('failed workspace saves stay retryable and never display unsaved data as saved', async ({page}) => {
+  await page.goto('/app');
+  await page.getByRole('button', {name:'Create a workspace'}).click();
+  await page.getByLabel('Client name').fill('Acorn');
+  await page.getByLabel('Client brief').fill('Build the Acorn portal.');
+  await page.getByLabel('Writing rule').fill('Use short sentences.');
+  await page.getByLabel('First source label').fill('acorn/repo');
+  await page.getByLabel('Local folder').fill('/projects/acorn');
+  await page.getByLabel('First redaction term').fill('ACORN_KEY');
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'ccf:workspace-state') throw new DOMException('Storage full', 'QuotaExceededError');
+      return original.call(this, key, value);
+    };
+  });
+  await page.getByRole('button', {name:'Save workspace'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveText(/could not be saved/i);
+  await expect(page.getByLabel('Client name')).toHaveValue('Acorn');
+  expect(await page.evaluate(() => localStorage.getItem('ccf:workspace-state'))).toBeNull();
+  await page.reload();
+  await expect(page.getByRole('heading', {name:'Create your first client workspace'})).toBeVisible();
 });
 
 test('@claim:device-local browser workspace flow sends no workspace data off-origin', async ({ page }) => {
@@ -143,7 +184,6 @@ test('@claim:free-core free workspaces can check and export a delivery record', 
   await page.goto('/demo');
   await page.getByRole('button', {name:/Check boundary/}).click();
   await expect(page.getByText('Session ready for Northstar Coffee')).toBeVisible();
-  await page.reload();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', {name:/Export latest record/}).click();
   const download = await downloadPromise;
@@ -154,6 +194,25 @@ test('@claim:paid-checkout Buy Pro starts the hosted Sociobot checkout', async (
   const response = await request.get('https://api.sociobot.in/api/v1/products/freelancer-agent-context/checkout', {maxRedirects: 0});
   expect(response.status()).toBe(303);
   expect(response.headers().location).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+  const checkout = await request.get(response.headers().location!);
+  expect(checkout.status()).toBe(200);
+  const body = await checkout.text();
+  expect(body).toContain('$19.00');
+  expect(body).toContain('One-time Pro license');
+});
+
+test('license return verifies its token only once', async ({page}) => {
+  let requests = 0;
+  await page.route('https://api.sociobot.in/api/v1/products/freelancer-agent-context/verify?license=return-token', async route => {
+    requests += 1;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await route.fulfill({json:{valid:false,reason:'invalid'}});
+  });
+  await page.goto('/?license=return-token');
+  await expect.poll(() => requests).toBe(1);
+  await page.waitForTimeout(250);
+  expect(requests).toBe(1);
+  expect(page.url()).not.toContain('license=');
 });
 
 test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
@@ -170,7 +229,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.2']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.3']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);
@@ -180,4 +239,25 @@ test('mobile demo remains usable at 390 pixels', async ({ page }) => {
   await page.setViewportSize({width:390,height:844}); await page.goto('/demo');
   await expect(page.getByRole('button', {name:/Check boundary/})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const targets = page.locator('.site-header a, footer a, .demo-banner button, .demo-banner a');
+  for (let index = 0; index < await targets.count(); index += 1) {
+    const box = await targets.nth(index).boundingBox();
+    expect(box?.width, await targets.nth(index).textContent() ?? '').toBeGreaterThanOrEqual(44);
+    expect(box?.height, await targets.nth(index).textContent() ?? '').toBeGreaterThanOrEqual(44);
+  }
+});
+
+test('workspace tabs support arrow, Home, and End keys', async ({page}) => {
+  await page.goto('/demo');
+  const northstar = page.getByRole('tab', {name:/Northstar Coffee/});
+  const juniper = page.getByRole('tab', {name:/Juniper Legal/});
+  await northstar.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(juniper).toBeFocused();
+  await expect(juniper).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Home');
+  await expect(northstar).toBeFocused();
+  await expect(northstar).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('End');
+  await expect(juniper).toBeFocused();
 });

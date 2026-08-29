@@ -1,5 +1,6 @@
 import './style.css';
 import { clearDemo, getStorageError, loadState, removeWorkspaceScope, saveState } from './store';
+import { detectPlatform, platformAssets, type ReleaseAsset } from './release';
 import type { AppState, Connector, Source, Workspace } from './types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -11,6 +12,7 @@ let demo = false;
 let notice = '';
 let licenseNotice = false;
 let initialRoute = true;
+let licenseVerification: { token: string; promise: Promise<boolean> } | null = null;
 
 const isDesktop = () => '__TAURI_INTERNALS__' in window;
 
@@ -25,7 +27,7 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Keep each client’s work in its own boundary.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.2 · Original generated art</p></footer>`;
+  return `<footer><p>Keep each client’s work in its own boundary.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.3 · Original generated art</p></footer>`;
 }
 
 function icon(name: 'check'|'arrow'|'lock'|'export'): string {
@@ -68,15 +70,20 @@ function landing(): void {
 
 async function loadDownload(): Promise<void> {
   const panel = document.querySelector<HTMLDivElement>('#download-panel'); if (!panel) return;
-  const platform = /Mac/i.test(navigator.userAgent) ? 'macOS' : /Win/i.test(navigator.userAgent) ? 'Windows' : 'Linux';
-  const extensions = platform === 'macOS' ? ['.dmg'] : platform === 'Windows' ? ['.msi', '.exe'] : ['.AppImage', '.deb'];
+  const platform = detectPlatform(navigator.userAgent);
   try {
     const cacheKey = 'ccf:release'; const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '{}');
     const release = Date.now() - cached.savedAt < 3600000 ? cached.data : await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=1`).then(response => { if (!response.ok) throw new Error('release unavailable'); return response.json(); }).then(items => { if (!items[0]) throw new Error('release unavailable'); return items[0]; });
     localStorage.setItem(cacheKey, JSON.stringify({savedAt: Date.now(), data: release}));
-    const asset = release.assets?.find((item: {name:string}) => extensions.some(ext => item.name.endsWith(ext)));
-    if (!asset) throw new Error('asset unavailable');
-    panel.innerHTML = `<p class="stamp">DETECTED · ${platform.toUpperCase()}</p><a class="button primary" href="${escapeHtml(asset.browser_download_url)}">Download for ${platform} ${icon('arrow')}</a><p>${escapeHtml(asset.name)} · unsigned build</p>`;
+    const assets = platformAssets((release.assets ?? []) as ReleaseAsset[], platform, navigator.userAgent);
+    if (!assets[0]) throw new Error('asset unavailable');
+    const macChoices = platform === 'macOS' && assets.length > 1
+      ? `<div class="download-choices">${assets.slice(1).map(asset => `<a href="${escapeHtml(asset.browser_download_url)}">Download ${/aarch64|arm64/i.test(asset.name) ? 'Apple silicon' : 'Intel'} build</a>`).join('')}</div>`
+      : '';
+    const installNote = platform === 'Linux'
+      ? `<p>One-step install: <code>curl -fsSL https://freelancer-agent-context.sociobot.in/install.sh | sh</code></p><p>For a direct AppImage download, run <code>chmod +x ${escapeHtml(assets[0].name)}</code> before opening it.</p>`
+      : platform === 'macOS' ? '<p>Choose Apple silicon or Intel when both builds are listed.</p>' : '';
+    panel.innerHTML = `<p class="stamp">DETECTED · ${platform.toUpperCase()}</p><a class="button primary" href="${escapeHtml(assets[0].browser_download_url)}">Download for ${platform} ${icon('arrow')}</a><p>${escapeHtml(assets[0].name)} · unsigned build</p>${macChoices}${installNote}`;
   } catch {
     panel.innerHTML = `<p class="stamp">DETECTED · ${platform.toUpperCase()}</p><p>Downloads are being published.</p><a class="button secondary" href="https://github.com/${REPO}/releases">Open the release page ${icon('arrow')}</a>`;
   }
@@ -102,7 +109,7 @@ function renderEmpty(): string {
 function renderActive(active: Workspace): string {
   const sessions = state.sessions.filter(s => s.workspaceId === active.id);
   return `<div class="app-grid">
-    <aside class="client-rail" aria-label="Client workspaces"><div class="rail-title">Clients <button id="new-workspace" aria-label="Create a workspace">+</button></div><div class="client-tabs" role="tablist" aria-label="Choose a client">${state.workspaces.map(w => `<button role="tab" aria-selected="${w.id === active.id}" data-workspace="${w.id}"><b>${escapeHtml(w.code)}</b><span>${escapeHtml(w.name)}</span></button>`).join('')}</div></aside>
+    <aside class="client-rail" aria-label="Client workspaces"><div class="rail-title">Clients <button id="new-workspace" aria-label="Create a workspace">+</button></div><div class="client-tabs" role="tablist" aria-label="Choose a client">${state.workspaces.map(w => `<button role="tab" aria-selected="${w.id === active.id}" tabindex="${w.id === active.id ? '0' : '-1'}" data-workspace="${w.id}"><b>${escapeHtml(w.code)}</b><span>${escapeHtml(w.name)}</span></button>`).join('')}</div></aside>
     <section class="session-sheet" aria-labelledby="client-name"><div class="sheet-head"><div><p class="eyebrow">Active boundary</p><h2 id="client-name">${escapeHtml(active.name)}</h2></div><button class="text-button danger" id="delete-workspace">Delete workspace</button></div>
       <div class="brief-block"><h3>Client brief</h3><p>${escapeHtml(active.brief)}</p><h3>Writing rule</h3><p>${escapeHtml(active.voice)}</p></div>
       <details class="boundary-editor"><summary>Edit the client boundary</summary><form id="boundary-form"><label class="field"><span>Client brief</span><textarea name="brief" required rows="3">${escapeHtml(active.brief)}</textarea></label><label class="field"><span>Writing rule</span><input name="voice" value="${escapeHtml(active.voice)}" required></label><button class="button secondary" type="submit">Save brief</button></form><form id="source-form"><h3>Add a source</h3><label class="field"><span>Source label</span><input name="label" required></label><label class="field"><span>Local folder</span><input name="folder" required placeholder="/path/to/client/project"><small>The desktop launcher opens the agent in this folder.</small></label><label class="field"><span>Coding agent</span><select name="connector"><option value="codex">Codex CLI</option><option value="claude">Claude Code</option><option value="gemini">Gemini CLI</option></select></label><label class="field"><span>Account reminder <small>(optional)</small></span><input name="account"><small>This label is not used as proof. Sign in inside the isolated agent profile.</small></label><label class="field"><span>Source type</span><select name="kind"><option>Git</option><option>Drive</option><option>Chat</option><option>Folder</option></select></label><button class="button secondary" type="submit">Add scoped source</button></form><form id="rule-form"><h3>Add a redaction rule</h3><label class="field"><span>Text to find</span><input name="term" required></label><label class="field"><span>Replacement</span><input name="replacement" value="[REDACTED]" required></label><button class="button secondary" type="submit">Add rule</button></form></details>
@@ -112,12 +119,16 @@ function renderActive(active: Workspace): string {
       </form>
       <div id="check-result" aria-live="polite"></div>
     </section>
-    <aside class="ledger"><h2>Delivery records</h2>${sessions.length ? `<ol>${sessions.map(s => `<li><span>${new Date(s.startedAt).toLocaleDateString()}</span><b>${s.sourceIds.length} source${s.sourceIds.length === 1 ? '' : 's'} checked</b></li>`).join('')}</ol><button class="button secondary" id="export-record">Export latest record ${icon('export')}</button>` : '<p>No delivery records yet.</p><p>Run a clean session check to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(r => escapeHtml(r.term)).join(' · ')}</p></div></aside>
+    <aside class="ledger">${renderLedger(active, sessions)}</aside>
   </div>${workspaceDialog()}`;
 }
 
+function renderLedger(active: Workspace, sessions = state.sessions.filter(session => session.workspaceId === active.id)): string {
+  return `<h2>Delivery records</h2>${sessions.length ? `<ol>${sessions.map(session => `<li><span>${new Date(session.startedAt).toLocaleDateString()}</span><b>${session.sourceIds.length} source${session.sourceIds.length === 1 ? '' : 's'} checked</b></li>`).join('')}</ol><button class="button secondary" id="export-record">Export latest record ${icon('export')}</button>` : '<p>No delivery records yet.</p><p>Run a clean session check to create one.</p>'}<div class="boundary-note"><b>${active.rules.length} redaction rules</b><p>${active.rules.map(rule => escapeHtml(rule.term)).join(' · ')}</p></div>`;
+}
+
 function workspaceDialog(): string {
-  return `<dialog id="workspace-dialog"><form method="dialog" id="workspace-form"><div class="dialog-head"><h2>Create a client workspace</h2><button value="cancel" aria-label="Close dialog">×</button></div><label class="field"><span>Client name</span><input name="name" required maxlength="60"></label><label class="field"><span>Client brief</span><textarea name="brief" required rows="3"></textarea></label><label class="field"><span>Writing rule</span><input name="voice" required></label><label class="field"><span>First source label</span><input name="source" required placeholder="client/repository"></label><label class="field"><span>Local folder</span><input name="folder" required placeholder="/path/to/client/project"></label><label class="field"><span>Coding agent</span><select name="connector"><option value="codex">Codex CLI</option><option value="claude">Claude Code</option><option value="gemini">Gemini CLI</option></select></label><label class="field"><span>Account reminder <small>(optional)</small></span><input name="account" type="text"></label><label class="field"><span>First redaction term</span><input name="term" required></label><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button value="default" class="button primary" id="save-workspace">Save workspace</button></div></form></dialog>`;
+  return `<dialog id="workspace-dialog"><form method="dialog" id="workspace-form"><div class="dialog-head"><h2>Create a client workspace</h2><button value="cancel" aria-label="Close dialog">×</button></div><div id="workspace-error" class="form-error" role="alert" aria-live="assertive"></div><label class="field"><span>Client name</span><input name="name" required maxlength="60"></label><label class="field"><span>Client brief</span><textarea name="brief" required rows="3"></textarea></label><label class="field"><span>Writing rule</span><input name="voice" required></label><label class="field"><span>First source label</span><input name="source" required placeholder="client/repository"></label><label class="field"><span>Local folder</span><input name="folder" required placeholder="/path/to/client/project"></label><label class="field"><span>Coding agent</span><select name="connector"><option value="codex">Codex CLI</option><option value="claude">Claude Code</option><option value="gemini">Gemini CLI</option></select></label><label class="field"><span>Account reminder <small>(optional)</small></span><input name="account" type="text"></label><label class="field"><span>First redaction term</span><input name="term" required></label><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button value="default" class="button primary" id="save-workspace">Save workspace</button></div></form></dialog>`;
 }
 
 async function renderWorkspace(): Promise<void> {
@@ -130,9 +141,24 @@ async function renderWorkspace(): Promise<void> {
 }
 
 function wireWorkspace(): void {
-  document.querySelectorAll<HTMLButtonElement>('[data-workspace]').forEach(button => button.addEventListener('click', async () => {
-    state.activeId = button.dataset.workspace!; await saveState(state, demo); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
-  }));
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-workspace]')];
+  const selectWorkspace = async (button: HTMLButtonElement) => {
+    const nextState = structuredClone(state); nextState.activeId = button.dataset.workspace!;
+    try { await saveState(nextState, demo); state = nextState; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); document.querySelector<HTMLButtonElement>(`[data-workspace="${CSS.escape(button.dataset.workspace!)}"]`)?.focus(); }
+    catch { notice = getStorageError(); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); }
+  };
+  tabs.forEach((button, index) => {
+    button.addEventListener('click', () => void selectWorkspace(button));
+    button.addEventListener('keydown', event => {
+      let target = index;
+      if (event.key === 'ArrowRight') target = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') target = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') target = 0;
+      else if (event.key === 'End') target = tabs.length - 1;
+      else return;
+      event.preventDefault(); void selectWorkspace(tabs[target]);
+    });
+  });
   document.querySelector('#new-workspace')?.addEventListener('click', () => (document.querySelector<HTMLDialogElement>('#workspace-dialog'))?.showModal());
   document.querySelector('#workspace-form')?.addEventListener('submit', async event => {
     const submitter = (event as SubmitEvent).submitter as HTMLButtonElement;
@@ -141,25 +167,34 @@ function wireWorkspace(): void {
     if (!demo && state.workspaces.length >= 2 && !licenseActive()) { notice = 'The free plan includes two workspaces. Add a Pro license for more.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); return; }
     const form = new FormData(event.currentTarget as HTMLFormElement); const name = String(form.get('name'));
     const workspace: Workspace = { id: uid(), name, code: name.split(/\s+/).map(v => v[0]).join('').slice(0,2).toUpperCase(), brief: String(form.get('brief')), voice: String(form.get('voice')), sources: [{ id: uid(), label: String(form.get('source')), account: String(form.get('account')), kind: 'Git', connector: String(form.get('connector')) as Connector, folder: String(form.get('folder')) }], rules: [{ id: uid(), term: String(form.get('term')), replacement: '[REDACTED]' }], updatedAt: new Date().toISOString() };
-    state.workspaces.push(workspace); state.activeId = workspace.id; await saveState(state, demo); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
+    const nextState = structuredClone(state); nextState.workspaces.push(workspace); nextState.activeId = workspace.id;
+    try {
+      await saveState(nextState, demo); state = nextState; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
+    } catch {
+      const error = document.querySelector<HTMLDivElement>('#workspace-error');
+      if (error) error.textContent = getStorageError();
+    }
   });
   document.querySelector('#delete-workspace')?.addEventListener('click', async () => {
     const active = state.workspaces.find(w => w.id === state.activeId);
     if (!active || !confirm(`Delete ${active.name}, its local records, and its isolated agent profile?`)) return;
-    try {
-      // Clean the on-disk profile first. If cleanup fails, leave the workspace
-      // intact so its user can retry rather than believing it was offboarded.
-      await removeWorkspaceScope(active.id, demo);
-    } catch {
+    const previousState = structuredClone(state);
+    const nextState = structuredClone(state);
+    nextState.workspaces = nextState.workspaces.filter(w => w.id !== active.id); nextState.sessions = nextState.sessions.filter(s => s.workspaceId !== active.id); nextState.activeId = nextState.workspaces[0]?.id ?? null;
+    try { await saveState(nextState, demo); }
+    catch { notice = getStorageError(); app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); return; }
+    try { await removeWorkspaceScope(active.id, demo); }
+    catch {
+      try { await saveState(previousState, demo); } catch { /* Keep the recovery message below. */ }
       notice = 'The workspace was not deleted because its isolated agent profile could not be removed. Close the agent, then try again.';
       app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); return;
     }
-    state.workspaces = state.workspaces.filter(w => w.id !== active.id); state.sessions = state.sessions.filter(s => s.workspaceId !== active.id); state.activeId = state.workspaces[0]?.id ?? null; await saveState(state, demo); notice = 'Workspace and isolated agent profile deleted.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
+    state = nextState; notice = 'Workspace and isolated agent profile deleted.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace();
   });
   document.querySelector('#preflight-form')?.addEventListener('submit', runPreflight);
-  document.querySelector('#boundary-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.brief = String(data.get('brief')); active.voice = String(data.get('voice')); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Client brief saved.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
-  document.querySelector('#source-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.sources.push({id:uid(), label:String(data.get('label')), account:String(data.get('account')), kind:String(data.get('kind')) as 'Git'|'Drive'|'Chat'|'Folder', connector:String(data.get('connector')) as Connector, folder:String(data.get('folder'))}); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Scoped source added to this workspace.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
-  document.querySelector('#rule-form')?.addEventListener('submit', async event => { event.preventDefault(); const active = state.workspaces.find(w => w.id === state.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.rules.push({id:uid(), term:String(data.get('term')), replacement:String(data.get('replacement'))}); active.updatedAt = new Date().toISOString(); await saveState(state, demo); notice = 'Redaction rule added.'; app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
+  document.querySelector('#boundary-form')?.addEventListener('submit', async event => { event.preventDefault(); const nextState = structuredClone(state); const active = nextState.workspaces.find(w => w.id === nextState.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.brief = String(data.get('brief')); active.voice = String(data.get('voice')); active.updatedAt = new Date().toISOString(); try { await saveState(nextState, demo); state = nextState; notice = 'Client brief saved.'; } catch { notice = getStorageError(); } app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
+  document.querySelector('#source-form')?.addEventListener('submit', async event => { event.preventDefault(); const nextState = structuredClone(state); const active = nextState.workspaces.find(w => w.id === nextState.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.sources.push({id:uid(), label:String(data.get('label')), account:String(data.get('account')), kind:String(data.get('kind')) as 'Git'|'Drive'|'Chat'|'Folder', connector:String(data.get('connector')) as Connector, folder:String(data.get('folder'))}); active.updatedAt = new Date().toISOString(); try { await saveState(nextState, demo); state = nextState; notice = 'Scoped source added to this workspace.'; } catch { notice = getStorageError(); } app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
+  document.querySelector('#rule-form')?.addEventListener('submit', async event => { event.preventDefault(); const nextState = structuredClone(state); const active = nextState.workspaces.find(w => w.id === nextState.activeId)!; const data = new FormData(event.currentTarget as HTMLFormElement); active.rules.push({id:uid(), term:String(data.get('term')), replacement:String(data.get('replacement'))}); active.updatedAt = new Date().toISOString(); try { await saveState(nextState, demo); state = nextState; notice = 'Redaction rule added.'; } catch { notice = getStorageError(); } app.innerHTML = workspaceShell(); wireShared(); wireWorkspace(); });
   document.querySelector('#export-record')?.addEventListener('click', exportLatest);
   document.querySelectorAll<HTMLButtonElement>('[data-launch-source]').forEach(button => button.addEventListener('click', () => launchScopedAgent(button.dataset.launchSource!, button)));
   document.querySelector('#reset-demo')?.addEventListener('click', async () => { clearDemo(); notice = 'Demo reset to its original sample.'; await renderWorkspace(); });
@@ -177,9 +212,13 @@ async function runPreflight(event: Event): Promise<void> {
   const result = document.querySelector<HTMLDivElement>('#check-result')!;
   if (failures.length) { result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">SESSION BLOCKED</p><h3>Fix ${failures.length} boundary ${failures.length === 1 ? 'check' : 'checks'}</h3><ul>${failures.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul><p>Change the account or text, then check again.</p></section>`; result.firstElementChild?.scrollIntoView({behavior:'smooth', block:'nearest'}); return; }
   const checks = ['Each selected source has a scoped agent profile', 'No other client names found', `${active.rules.length} redaction rules checked`];
-  state.sessions.unshift({ id: uid(), workspaceId: active.id, startedAt: new Date().toISOString(), sourceIds, checks }); await saveState(state, demo);
+  const nextState = structuredClone(state); nextState.sessions.unshift({ id: uid(), workspaceId: active.id, startedAt: new Date().toISOString(), sourceIds, checks });
+  try { await saveState(nextState, demo); state = nextState; }
+  catch { result.innerHTML = `<section class="result blocked" tabindex="-1"><p class="stamp">NOT SAVED</p><h3>The delivery record was not created</h3><p>${escapeHtml(getStorageError())}</p></section>`; (result.firstElementChild as HTMLElement).focus(); return; }
   result.innerHTML = `<section class="result passed" tabindex="-1"><p class="stamp">BOUNDARY PASSED</p><h3>Session ready for ${escapeHtml(active.name)}</h3><ul>${checks.map(c => `<li>${icon('check')} ${escapeHtml(c)}</li>`).join('')}</ul><div class="launch-actions">${selected.map(source => `<button class="button secondary" type="button" data-launch-source="${escapeHtml(source.id)}">Open ${escapeHtml(source.connector)} for ${escapeHtml(source.label)}</button>`).join('')}</div><p class="launch-help">${demo ? 'Demo mode shows the launch step but never opens a local process.' : isDesktop() ? 'The agent opens with this client’s separate credential and config folders.' : 'Install the desktop app to open a scoped agent.'}</p><div class="launch-status" aria-live="polite"></div></section>`;
   document.querySelectorAll<HTMLButtonElement>('[data-launch-source]').forEach(button => button.addEventListener('click', () => launchScopedAgent(button.dataset.launchSource!, button)));
+  const ledger = document.querySelector<HTMLElement>('.ledger'); if (ledger) ledger.innerHTML = renderLedger(active);
+  document.querySelector('#export-record')?.addEventListener('click', exportLatest);
   (result.firstElementChild as HTMLElement).focus();
 }
 
@@ -238,7 +277,14 @@ function licenseActive(): boolean { try { const cached = JSON.parse(localStorage
 async function verifyLicense(token: string, force = false): Promise<boolean> {
   const cacheKey = 'sb_license_verdict:freelancer-agent-context';
   try { const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '{}'); if (!force && Date.now() - cached.checkedAt < 86400000) return cached.valid === true; } catch {}
-  try { const response = await fetch(`${BILLING}/verify?license=${encodeURIComponent(token)}`); const result = await response.json(); localStorage.setItem(cacheKey, JSON.stringify({valid: result.valid === true, checkedAt: Date.now()})); return result.valid === true; } catch { return licenseActive(); }
+  if (licenseVerification?.token === token) return licenseVerification.promise;
+  const promise = (async () => {
+    try { const response = await fetch(`${BILLING}/verify?license=${encodeURIComponent(token)}`); const result = await response.json(); localStorage.setItem(cacheKey, JSON.stringify({valid: result.valid === true, checkedAt: Date.now()})); return result.valid === true; }
+    catch { return licenseActive(); }
+  })();
+  licenseVerification = { token, promise };
+  try { return await promise; }
+  finally { if (licenseVerification?.promise === promise) licenseVerification = null; }
 }
 
 function acceptReturnedLicense(): void {

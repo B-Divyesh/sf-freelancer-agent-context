@@ -48,8 +48,9 @@ export async function saveState(state: AppState, demo: boolean): Promise<void> {
     else if (isTauri()) await tauriInvoke('save_vault', { contents: serialized });
     else localStorage.setItem(key(false), serialized);
     storageError = '';
-  } catch {
+  } catch (error) {
     storageError = 'This change could not be saved. Check device storage, then try again.';
+    throw error;
   }
 }
 

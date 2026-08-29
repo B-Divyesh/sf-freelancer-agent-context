@@ -4,6 +4,12 @@ export default defineConfig({
   plugins: [{
     name: 'service-worker-upgrade-fixture',
     configurePreviewServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const path = request.url?.split('?')[0] ?? '/';
+        const known = ['/', '/demo', '/app', '/privacy', '/terms'];
+        if (!known.includes(path) && !path.includes('.')) response.statusCode = 404;
+        next();
+      });
       server.middlewares.use('/test/sw-driver.html', (_request, response) => {
         response.setHeader('Content-Type', 'text/html');
         response.end('<!doctype html><title>Service worker test</title>');

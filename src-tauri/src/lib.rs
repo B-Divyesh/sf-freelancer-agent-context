@@ -250,8 +250,7 @@ fn vault_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(dir.join("workspace.vault"))
 }
 
-fn vault_key() -> Result<[u8; 32], String> {
-    let entry = keyring::Entry::new(SERVICE, ACCOUNT).map_err(|error| error.to_string())?;
+fn vault_key_from_entry(entry: &keyring::Entry) -> Result<[u8; 32], String> {
     if let Ok(encoded) = entry.get_password() {
         let bytes = STANDARD
             .decode(encoded)
@@ -266,6 +265,11 @@ fn vault_key() -> Result<[u8; 32], String> {
         .set_password(&STANDARD.encode(key))
         .map_err(|error| error.to_string())?;
     Ok(key)
+}
+
+fn vault_key() -> Result<[u8; 32], String> {
+    let entry = keyring::Entry::new(SERVICE, ACCOUNT).map_err(|error| error.to_string())?;
+    vault_key_from_entry(&entry)
 }
 
 fn encrypt(contents: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
@@ -346,12 +350,29 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
-    use super::{decrypt, delete_workspace_scope_at, encrypt, launch_scope, LaunchRequest};
+    use super::{
+        decrypt, delete_workspace_scope_at, encrypt, launch_scope, vault_key_from_entry,
+        LaunchRequest,
+    };
+    use base64::Engine;
     use std::{env, fs};
 
     #[test]
     fn encrypted_vault_round_trips_and_rejects_another_key() {
-        let key = [7u8; 32];
+        let credential = keyring::mock::default_credential_builder()
+            .build(None, "test-service", "test-user")
+            .unwrap();
+        let entry = keyring::Entry::new_with_credential(credential);
+        assert!(matches!(entry.get_password(), Err(keyring::Error::NoEntry)));
+        let key = vault_key_from_entry(&entry).unwrap();
+        let stored = entry.get_password().unwrap();
+        assert_eq!(
+            base64::engine::general_purpose::STANDARD
+                .decode(stored)
+                .unwrap(),
+            key
+        );
+        assert_eq!(vault_key_from_entry(&entry).unwrap(), key);
         let other_key = [8u8; 32];
         let encrypted = encrypt(br#"{\"client\":\"Northstar\"}"#, &key).unwrap();
         assert_ne!(&encrypted[12..], br#"{\"client\":\"Northstar\"}"#);

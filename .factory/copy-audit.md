@@ -1,6 +1,6 @@
 # Landing copy audit
 
-Checked 2026-08-28 after repair. Counts treat hyphenated terms as one word.
+Checked 2026-08-29 after repair. Counts treat hyphenated terms as one word.
 Headings, labels, and buttons are included even when they are fragments.
 
 | Copy | Words | Result |
@@ -39,6 +39,9 @@ Headings, labels, and buttons are included even when they are fragments.
 | Install your local workspace | 4 | Pass |
 | Choose the package for your system when releases are published. | 10 | Pass |
 | Current builds are unsigned. | 4 | Pass |
+| One-step install: curl -fsSL [site]/install.sh \| sh | 5 | Pass |
+| For a direct AppImage download, run chmod +x [release filename] before opening it. | 12 | Pass |
+| Choose Apple silicon or Intel when both builds are listed. | 10 | Pass |
 | Downloads are being published. | 4 | Pass |
 | More clients, same local boundary | 5 | Pass |
 | Pro lets you create more than two workspaces. | 8 | Pass |

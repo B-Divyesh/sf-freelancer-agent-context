@@ -56,6 +56,10 @@ npm run build
 `npm run tauri -- build` for the desktop package on a supported host. On Linux,
 install the Tauri 2 system packages, `libsecret-1-dev`, `libfuse2`, `file`, and `rpm`.
 GitHub Actions builds macOS, Windows, and Linux assets from a `v*` tag.
+The landing page separates Intel and Apple silicon downloads. On Linux, run
+`curl -fsSL https://freelancer-agent-context.sociobot.in/install.sh | sh` to
+verify the AppImage and install it as `client-context-firewall` in your user
+binary directory. A direct AppImage download needs `chmod +x` before use.
 
 ## Routes
 
