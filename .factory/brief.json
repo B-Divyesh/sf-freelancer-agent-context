@@ -3,6 +3,6 @@
   "title": "Client Context Firewall",
   "summary": "Keep each client’s sources, rules, and delivery record in one local workspace.",
   "artifact_class": "desktop-app",
-  "monetization": "subscription — $19/month",
+  "monetization": "one-time purchase — $19",
   "success_measure": "Ten freelancers complete 30 client sessions with zero cross-client connector use and report a 25% reduction in setup time."
 }

@@ -8,6 +8,5 @@
 
 The verifier can run a clean check with the selected Northstar source. Adding
 “Juniper Legal” to the draft demonstrates both client-name and redaction-term
-blocks. The demo never validates a local folder, creates a scoped profile, or
-starts a local process. Its export is explicitly marked sample data rather than
-desktop launch provenance.
+blocks. The demo never validates a local folder, creates a client profile, or
+starts a local agent. Its export is explicitly marked as sample data.

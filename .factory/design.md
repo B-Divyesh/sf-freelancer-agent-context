@@ -54,7 +54,7 @@ feature-card grid.
 
 The repaired launch action remains part of the same ledger grammar. A passed
 check exposes one labelled agent-launch control per selected source. Status
-text reports the client-only profile path without adding a modal or a second
+text reports the client profile path without adding a modal or a second
 visual system.
 
 ## Motion policy

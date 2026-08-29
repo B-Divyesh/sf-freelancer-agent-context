@@ -7,7 +7,7 @@ using coding agents. The desktop app validates each local folder, then opens
 each agent with a separate client profile. A client profile is one sign-in and
 settings folder for one client. It checks other client names and redaction
 terms before launch. The app gives the launched agent the saved brief, writing
-rule, redaction rules, and checked text from a temporary file on this device.
+rule, redaction rules, and checked text. It uses a temporary file on this device.
 
 ## Try the isolated demo
 
@@ -28,8 +28,8 @@ opening an agent, the app removes API keys inherited from its parent process.
 Choose a local project folder, then sign in inside that client profile. Your
 chosen coding agent may use its own online service.
 
-A real delivery record appears only after every selected connector opens from
-its validated local folder. The record names the client profile and confirms
+A real delivery record appears only after every selected agent opens from its
+source’s saved local folder. The record names the client profile and confirms
 which agents opened. Demo exports are marked sample data and never claim a
 local launch.
 
@@ -60,7 +60,7 @@ npm run lint
 npm run build
 ```
 
-`npm run build` produces the static site at `dist/site/`. Run
+Use `npm run build` to create the static site. Run
 `npm run tauri -- build` for the desktop package on a supported host. On Linux,
 install the Tauri 2 system packages, `libsecret-1-dev`, `libfuse2`, `file`, and `rpm`.
 To publish desktop assets, push a `v*` tag through the included GitHub Actions
@@ -78,8 +78,8 @@ binary directory. A direct AppImage download needs `chmod +x` before use.
 
 ## Deployment
 
-Deploy `dist/site/` as the static root. The included hosting config keeps
-direct links working and adds security headers. The factory owns DNS, billing
-registration, and release signing.
+Deploy `dist/site/` as the static root. Hosting rules are in
+`public/staticwebapp.config.json`. The factory owns DNS, billing registration,
+and release signing.
 
 Licensed under the MIT License. Built by Param Factory.

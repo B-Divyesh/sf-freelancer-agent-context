@@ -667,8 +667,7 @@ mod tests {
         assert!(decrypt(&encrypted, &other_key).is_err());
     }
 
-    #[test]
-    fn scoped_launch_separates_connector_credentials() {
+    fn assert_scoped_launch_separates_connector_credentials() {
         let base = env::temp_dir().join(format!("ccf-scope-test-{}", std::process::id()));
         let folder = base.join("project");
         fs::create_dir_all(&folder).unwrap();
@@ -700,7 +699,8 @@ mod tests {
     /// selected workspace identity and the complete checked context file.
     #[cfg(unix)]
     #[test]
-    fn scoped_launch_clears_parent_provider_credentials_and_binds_checked_context() {
+    fn claim_scoped_launch() {
+        assert_scoped_launch_separates_connector_credentials();
         let base = env::temp_dir().join(format!("ccf-native-launch-test-{}", std::process::id()));
         let folder = base.join("project");
         fs::create_dir_all(&folder).unwrap();

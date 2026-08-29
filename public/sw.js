@@ -1,4 +1,4 @@
-const CACHE = 'ccf-shell-v0.1.5';
+const CACHE = 'ccf-shell-v0.1.6';
 const SHELL = ['/', '/demo', '/app', '/privacy', '/terms', '/art/boundary-ledger.webp', '/icons/favicon.svg'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));

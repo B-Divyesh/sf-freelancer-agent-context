@@ -6,7 +6,7 @@ export default defineConfig({
     configurePreviewServer(server) {
       server.middlewares.use((request, response, next) => {
         const path = request.url?.split('?')[0] ?? '/';
-        const known = ['/', '/demo', '/app', '/privacy', '/terms'];
+        const known = ['/', '/demo', '/app', '/privacy', '/terms', '/art-provenance'];
         if (!known.includes(path) && !path.includes('.')) response.statusCode = 404;
         next();
       });
