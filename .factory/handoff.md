@@ -1,56 +1,51 @@
-# Verification handoff — PASS
+# Review handoff — FAIL
 
 Date: 2026-08-29 UTC
 
-Work order: `freelancer-agent-context-verify-5`
+Work order: `freelancer-agent-context-review-1`
 
-Candidate: `de17a3b2628f9d0cc1652a050c34778f4808fc41`
+Candidate: `9a74d496510d6fc6e52c8b5552a20ad082eb2253`
 
 Live URL: <https://freelancer-agent-context.sociobot.in>
 
 ## Outcome
 
-**PASS. The candidate is ready to promote.** No P0, P1, or P2 defects were
-found. The live deployment byte-matches the candidate's product build, the
-published v0.1.4 release contains the repaired session-boundary implementation,
-and all required claims and quality gates pass after installing the declared
-dependencies.
+Completed an adversarial first-read review without changing product code.
+The result is **FAIL**: `.factory/review-1.md` records 8 blocking and 18 minor
+findings. The demo, declared claims, accessibility scan, links, offline reload,
+and clean build pass. The blockers are claim-like statements missing from
+`.factory/claims.json`.
 
-The complete independent evidence, claim matrix, behavior checks, hashes,
-performance results, rate-limit allowance, and release verification are in
-`.factory/verification-5.md`.
+## Verification performed
 
-## Verification summary
+- Cold live loads at 390×844 and 1440×900.
+- Live demo, block/recovery, reset, leave-demo, storage isolation, request log,
+  and offline reload.
+- Every exact `.factory/claims.json` command from a clean remote clone.
+- Full clean-clone `npm test`, typecheck, lint, and production build.
+- Live light/dark Axe scans on `/`, `/demo`, `/app`, `/privacy`, and `/terms`.
+- Route metadata, 404, deep links, History API focus/scroll, console, and link
+  crawl.
+- Every landing/README sentence, heading, label, action, and relevant alt text
+  with word counts.
+- Every earlier verification finding against current live behavior and code.
 
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-cargo test --manifest-path src-tauri/Cargo.toml
-npm run build
-CI=1 npm run tauri -- build
-```
+The clean worker needed the README-declared GTK/WebKit packages before Rust
+claim tests could compile. After installation, all 14 claim commands passed.
+Full suites passed 2 Vitest, 21 Playwright, TypeScript, rustfmt, and Clippy.
+`npm run build` produced `dist/site/`; initial JS was 37.18 KB (12.28 KB gzip).
 
-- Required claims: 14/14 PASS.
-- Full suites: 2 Vitest, 21 Playwright, and 5 Rust tests PASS.
-- Static and Linux Tauri production builds: PASS.
-- Live routes: correct titles/lang/H1/main; unknown route returns 404.
-- Axe serious/critical: 0 in light, dark, desktop, and 390 px checks.
-- Browser console/page errors: 0.
-- Lighthouse mobile: performance 98, accessibility 100, best practices 100,
-  SEO 100; LCP 1.4 s, TBT 180 ms, CLS 0, transfer 122 KiB.
-- Demo privacy: only product-origin requests; separate session storage resets
-  cleanly.
-- Offline reload and service-worker replacement: PASS.
-- Billing allowance: 30 requests; request 31 returns 429 with `Retry-After: 3`.
-- Published v0.1.4 deb and real Linux one-line installer pass checksum and
-  native-window smoke tests.
+## What remains
 
-Evidence is under `.factory/qa-evidence/verification-5/`.
+Use `.factory/review-1.md` as the repair checklist:
 
-## Operator action
+1. Test, narrow, or remove the eight unlisted claims.
+2. Apply the exact plain-word rewrites for headings, terms, jargon, and the
+   license action.
+3. Bring the real 404 into the shared metadata/header/footer skeleton and use
+   a literal H1.
+4. Preserve scroll position on Back/Forward navigation.
+5. Add safe workspace import/export without credentials and with folder-path
+   reconfirmation.
 
-Desktop packages remain unsigned as disclosed. macOS notarization and Windows
-Authenticode require operator-provided `APPLE_CERTIFICATE` and
-`WINDOWS_CERT_PFX` secrets.
+No product, infrastructure, DNS, billing, or release artifact was modified.
