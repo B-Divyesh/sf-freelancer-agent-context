@@ -22,12 +22,19 @@ v0.1.5. The distinct dithered boundary-ledger visual system remains intact.
 - `npm run test:e2e -- --grep @claim:paid-checkout` — pass.
 - `npm run test:unit -- --run -t '@claim:(art-provenance|refund-route|platform-install)'` — 3 claim tests passed.
 - `npx playwright test --grep 'workspace-backup|Back navigation'` — pass after the final import and history changes.
+- `npm run lint` — pass after installing the README-declared GTK/WebKit prerequisites.
+- Four Rust claim commands — pass: scoped launch (2 tests), failed preflight, encrypted vault, and workspace deletion.
+- `npm test` — 4 Vitest and 23 Playwright tests pass.
 - `npm run build` — pass; output `dist/site/`; initial JS 13.73 KB gzip and CSS 4.49 KB gzip.
-- GTK/WebKit Tauri prerequisites were installed before the Rust quality/test gates.
 
 ## Deployment
 
-Static deployment and cold live verification are recorded after the v0.1.5 commit is pushed and deployed. Desktop release workflow is triggered by the `v0.1.5` tag.
+Static site deployed with `/opt/fleet/lib/deploy-static.sh freelancer-agent-context dist/site`.
+
+- Cold live `verify-url.sh` passed at <https://freelancer-agent-context.sociobot.in>: 1,095 ms, no console errors, title/lang/one H1/main/alt/button checks pass. Evidence: `.factory/qa-evidence/polish-1/verify.json`.
+- Cold mobile live checks passed for `/?demo=1`, `/privacy`, `/terms`, `/art-provenance`, and 404. Each normal route has one H1, zero serious/critical Axe findings, and zero console errors. `/?demo=1` showed the demo banner with Reset demo and Start for real. Evidence: `.factory/qa-evidence/polish-1/live-demo-mobile.png`.
+- Static 404 correctly returned HTTP 404 with the shared skeleton and metadata. Its browser’s expected failed-navigation console line is a network status report, not an application exception.
+- Desktop release workflow is triggered by pushed tag `v0.1.5`.
 
 ## Known gaps
 

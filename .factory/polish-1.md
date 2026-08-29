@@ -25,4 +25,4 @@ Candidate repaired from `de17a3b2628f9d0cc1652a050c34778f4808fc41` using review 
 | F-1-25 | Save scroll before push navigation; restore it after Back/Forward without moving focus into view. | `Back navigation preserves landing scroll position` |
 | F-1-26 | Added local JSON backup/export and reviewed import with saved-path confirmation; backups omit sign-in reminders, license data, and delivery records. | `@claim:workspace-backup` |
 
-The requested direct demo route is now `/?demo=1`; it enters the separate `demo:workspace-state` namespace and shows the persistent banner, reset, and real-start controls. `/demo` remains supported.
+The requested direct demo route is now `/?demo=1`; it enters the separate `demo:workspace-state` namespace and shows the persistent banner, reset, and real-start controls. `/demo` remains supported. Cold production checks at <https://freelancer-agent-context.sociobot.in/?demo=1> passed with zero serious/critical Axe findings and zero console errors; screenshot: `.factory/qa-evidence/polish-1/live-demo-mobile.png`.
