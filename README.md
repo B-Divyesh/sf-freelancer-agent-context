@@ -2,47 +2,49 @@
 
 Keep each client’s sources, rules, and delivery record in one local workspace.
 
-Client Context Firewall is for freelance developers who switch between client
-accounts while using coding agents. The desktop app validates each local
-folder, then opens each agent with a separate credential and config profile for
-that client. It checks other client names and redaction terms before launch.
-The launched agent receives the saved brief, writing rule, redaction rules, and
-the checked text from a device-local session file.
+Client Context Firewall is for freelance developers who switch clients while
+using coding agents. The desktop app validates each local folder, then opens
+each agent with a separate client profile. A client profile is one sign-in and
+settings folder for one client. It checks other client names and redaction
+terms before launch. The app gives the launched agent the saved brief, writing
+rule, redaction rules, and checked text from a temporary file on this device.
 
 ## Try the isolated demo
 
-Open `/demo` or <https://freelancer-agent-context.sociobot.in/demo>. It ships
-with Northstar Coffee and Juniper Legal sample workspaces. Demo changes use
-session storage and never touch the real workspace namespace. Choose **Reset
-demo** at any time.
+Open `?demo=1`, `/demo`, or
+<https://freelancer-agent-context.sociobot.in/?demo=1>. It ships with
+Northstar Coffee and Juniper Legal sample workspaces. Demo changes last only
+in this tab and never change your real workspaces. Choose **Reset demo** at
+any time.
 
 ## Privacy and limits
 
 The desktop app encrypts its local workspace file with AES-256-GCM. Its random
 key is stored in the operating system credential manager. The browser preview
-stores workspaces locally and does not send workspace data off-origin.
+stores workspaces in this browser and sends no workspace data to another site.
 
-The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. It clears
-inherited provider and API credential variables before it starts a connector.
-Choose a local project folder, then sign in inside that client’s isolated
-profile. Your chosen coding agent may use its own online service.
+The desktop launcher supports Codex CLI, Claude Code, and Gemini CLI. Before
+opening an agent, the app removes API keys inherited from its parent process.
+Choose a local project folder, then sign in inside that client profile. Your
+chosen coding agent may use its own online service.
 
 A real delivery record appears only after every selected connector opens from
-its validated local folder. The record lists the native profile and launch
-receipts. Demo exports are marked sample data and never claim a local launch.
+its validated local folder. The record names the client profile and confirms
+which agents opened. Demo exports are marked sample data and never claim a
+local launch.
 
-Deleting a desktop workspace removes its workspace records and the complete
-isolated connector credential and config profile for that client.
+Deleting a desktop workspace removes its workspace records and complete client
+profile. Export a workspace backup to move it. Backups omit agent sign-ins,
+license data, and delivery records. Confirm local folder paths after import.
 
-The site works offline after the first visit. A new release replaces the
-previous cached application shell.
+The site works offline after the first visit. After an update, the site
+replaces its old offline files.
 
 ## Plans
 
 Free includes two client workspaces. Checks and delivery exports remain
 available on the free plan. Pro costs $19 once and allows more than two
-workspaces. Checkout and license verification use the Sociobot billing API.
-No product ID or payment provider is embedded in this repository.
+workspaces. Checkout is handled by Sociobot.
 
 ## Develop and verify
 
@@ -61,8 +63,8 @@ npm run build
 `npm run build` produces the static site at `dist/site/`. Run
 `npm run tauri -- build` for the desktop package on a supported host. On Linux,
 install the Tauri 2 system packages, `libsecret-1-dev`, `libfuse2`, `file`, and `rpm`.
-GitHub Actions builds macOS, Windows, and Linux assets from a `v*` tag.
-The landing page separates Intel and Apple silicon downloads. On Linux, run
+To publish desktop assets, push a `v*` tag through the included GitHub Actions
+workflow. The landing page separates Intel and Apple silicon downloads. On Linux, run
 `curl -fsSL https://freelancer-agent-context.sociobot.in/install.sh | sh` to
 verify the AppImage and install it as `client-context-firewall` in your user
 binary directory. A direct AppImage download needs `chmod +x` before use.
@@ -76,8 +78,8 @@ binary directory. A direct AppImage download needs `chmod +x` before use.
 
 ## Deployment
 
-Deploy `dist/site/` as the static root. The included Static Web Apps config
-adds SPA fallback and security headers. The factory owns DNS, billing
+Deploy `dist/site/` as the static root. The included hosting config keeps
+direct links working and adds security headers. The factory owns DNS, billing
 registration, and release signing.
 
 Licensed under the MIT License. Built by Param Factory.

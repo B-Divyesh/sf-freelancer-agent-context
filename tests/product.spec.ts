@@ -52,7 +52,7 @@ test('light and dark themes have no serious accessibility issues', async ({page}
 test('unknown routes return HTTP 404 with the designed not-found screen', async ({page}) => {
   const response = await page.goto('/not-a-real-page');
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole('heading', {name:'This page crossed the wrong boundary'})).toBeVisible();
+  await expect(page.getByRole('heading', {name:'This page was not found'})).toBeVisible();
 });
 
 test('cold-load keyboard order starts with the skip link', async ({ page }) => {
@@ -245,7 +245,7 @@ test('@claim:offline-update replaces a stale cached shell', async ({page}) => {
     });
     await navigator.serviceWorker.register('/sw.js', {scope:'/'});
   });
-  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.4']);
+  await expect.poll(() => page.evaluate(async () => (await caches.keys()).sort())).toEqual(['ccf-shell-v0.1.5']);
   await page.goto('/');
   await expect(page.getByRole('heading', {name:'Keep client work from crossing over'})).toBeVisible();
   await expect(page.getByText('stale shell')).toHaveCount(0);
@@ -276,4 +276,40 @@ test('workspace tabs support arrow, Home, and End keys', async ({page}) => {
   await expect(northstar).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('End');
   await expect(juniper).toBeFocused();
+});
+
+test('@claim:workspace-backup omits sign-ins and requires folder confirmation before import', async ({page}) => {
+  await page.goto('/app');
+  await page.getByRole('button', {name:'Create a workspace'}).click();
+  await page.getByLabel('Client name').fill('Acorn');
+  await page.getByLabel('Client brief').fill('Build the Acorn portal.');
+  await page.getByLabel('Writing rule').fill('Use short sentences.');
+  await page.getByLabel('First source label').fill('acorn/repo');
+  await page.getByLabel('Local folder').fill('/projects/acorn');
+  await page.getByLabel('Account reminder').fill('acorn@example.test');
+  await page.getByLabel('First redaction term').fill('ACORN_KEY');
+  await page.getByRole('button', {name:'Save workspace'}).click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', {name:'Export workspace'}).click();
+  const download = await downloadPromise; const backupPath = await download.path();
+  expect(JSON.parse(await import('node:fs/promises').then(fs => fs.readFile(backupPath!, 'utf8'))).workspace.sources[0].account).toBeUndefined();
+  await page.evaluate(() => localStorage.removeItem('ccf:workspace-state'));
+  await page.reload();
+  await page.getByRole('button', {name:'Import workspace'}).click();
+  await page.getByLabel('Workspace backup file').setInputFiles(backupPath!);
+  await expect(page.getByText(/Acorn: 1 source and 1 rule/)).toBeVisible();
+  await expect(page.getByRole('button', {name:'Import workspace'}).last()).toBeDisabled();
+  await page.getByLabel(/I will review saved paths/).check();
+  await page.getByRole('button', {name:'Import workspace'}).last().click();
+  await expect(page.getByRole('heading', {name:'Check this client session'})).toBeVisible();
+  await expect(page.getByText(/Sign-in reminder/)).toHaveCount(0);
+});
+
+test('Back navigation preserves landing scroll position', async ({page}) => {
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 1000));
+  const before = await page.evaluate(() => window.scrollY);
+  await page.getByRole('link', {name:/Try it with sample data/}).click();
+  await page.goBack();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(before - 5);
 });

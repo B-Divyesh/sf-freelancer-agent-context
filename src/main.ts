@@ -37,7 +37,18 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Keep each client’s work in its own boundary.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.4 · Original generated art</p></footer>`;
+  return `<footer><p>Keep each client’s work in its own workspace.</p><nav aria-label="Footer"><a class="nav-link" href="/privacy">Privacy</a><a class="nav-link" href="/terms">Terms</a><a class="nav-link" href="/art-provenance">Art provenance</a><a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></nav><p class="build">v0.1.5</p></footer>`;
+}
+
+function setMeta(title: string, description: string, path: string): void {
+  document.title = title;
+  const canonical = `https://freelancer-agent-context.sociobot.in${path}`;
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = canonical;
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = description;
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')!.content = title;
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')!.content = description;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')!.content = title;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')!.content = description;
 }
 
 function icon(name: 'check'|'arrow'|'lock'|'export'): string {
@@ -50,25 +61,25 @@ function icon(name: 'check'|'arrow'|'lock'|'export'): string {
 }
 
 function landing(): void {
-  document.title = 'Client Context Firewall — Keep client work apart';
+  setMeta('Client Context Firewall — Keep client work apart', 'Keep each client’s sources, rules, and delivery record in one local workspace.', '/');
   app.innerHTML = `${header()}<main id="main" tabindex="-1">
     <section class="hero">
       <div class="hero-copy"><p class="eyebrow">A local desktop boundary for freelancers</p><h1 tabindex="-1">Keep client work from crossing over</h1>
         <p class="lede">For freelance developers who switch clients without mixing sources, accounts, or writing style.</p>
-        <div class="hero-actions"><a class="button primary nav-link" href="/demo">Try it with sample data ${icon('arrow')}</a><span>See a checked client session next.</span></div>
+        <div class="hero-actions"><a class="button primary nav-link" href="/?demo=1">Try it with sample data ${icon('arrow')}</a><span>See a checked client session next.</span></div>
         <ul class="facts"><li>${icon('lock')} Browser workspaces stay on this device.</li><li>${icon('check')} Works offline after your first visit.</li><li><span aria-hidden="true">$</span> Free for two workspaces. Pro is $19 once.</li></ul>
       </div>
-      <figure class="hero-art"><div class="plate-label">BOUNDARY / 01</div><img src="/art/boundary-ledger.webp" srcset="/art/boundary-ledger-600.webp 600w, /art/boundary-ledger.webp 1200w" sizes="(max-width: 980px) 100vw, 50vw" width="1200" height="800" fetchpriority="high" decoding="async" alt="Two paper client folders sit on opposite sides of an orange divider."><figcaption>Separate briefs, source accounts, and rules before work begins.</figcaption></figure>
+      <figure class="hero-art"><div class="plate-label">Two client folders kept separate</div><img src="/art/boundary-ledger.webp" srcset="/art/boundary-ledger-600.webp 600w, /art/boundary-ledger.webp 1200w" sizes="(max-width: 980px) 100vw, 50vw" width="1200" height="800" fetchpriority="high" decoding="async" alt="Two paper client folders sit on opposite sides of an orange divider."><figcaption>Separate briefs, source accounts, and rules before work begins.</figcaption></figure>
     </section>
-    <section class="preview-section" aria-labelledby="preview-title"><div><p class="eyebrow">Live product preview</p><h2 id="preview-title">A boundary before the agent starts</h2><p>The desktop app opens each agent with a separate credential folder for that client.</p></div>
+    <section class="preview-section" aria-labelledby="preview-title"><div><p class="eyebrow">Live product preview</p><h2 id="preview-title">Preview a checked client session</h2><p>The desktop app opens each agent with a separate client profile: one sign-in and settings folder for that client.</p></div>
       <div class="preview" role="img" aria-label="Northstar workspace with two allowed sources and three passed boundary checks">
-        <div class="preview-tabs"><span>NS</span><span class="inactive">JL</span></div><div class="preview-sheet"><p class="stamp">NORTHSTAR / SESSION READY</p><h3>Sources in this session</h3><p>Codex · northstar/reorder <b>isolated profile</b></p><p>Claude · Wholesale briefs <b>isolated profile</b></p><ol class="check-list"><li>Client profile is separate</li><li>No other client names found</li><li>Two redaction rules loaded</li></ol></div>
+        <div class="preview-tabs"><span>NS</span><span class="inactive">JL</span></div><div class="preview-sheet"><p class="stamp">NORTHSTAR / SESSION READY</p><h3>Sources in this session</h3><p>Codex · northstar/reorder <b>client profile</b></p><p>Claude · Wholesale briefs <b>client profile</b></p><ol class="check-list"><li>Client profile is separate</li><li>No other client names found</li><li>Two redaction rules loaded</li></ol></div>
       </div>
     </section>
-    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">Set the boundary once</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Scope each connector</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open every selected agent in its client-only profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>Validated launch receipts enable a verified delivery record.</figcaption></figure></li></ol></section>
-    <section class="limits" aria-labelledby="limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="limits-title">A local launch boundary</h2></div><div><p>The desktop app separates each client’s agent credentials and config.</p><p>Your chosen agent may use its own online service.</p><p>The text check catches named clients and redaction terms before launch.</p></div></section>
-    <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install your local workspace</h2><p>Choose the package for your system when releases are published. Current builds are unsigned.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
-    <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">More clients, same local boundary</h2><p class="price"><strong>$19</strong> once</p><p>Pro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Paste a license</button><p>Sociobot is the merchant of record. Manage refunds there.</p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
+    <section class="steps" aria-labelledby="steps-title"><p class="eyebrow">How it works</p><h2 id="steps-title">How the client check works</h2><ol><li><span>01</span><h3>Name the workspace</h3><p>Add the brief and writing rules that belong to one client.</p><figure><img src="/screens/01-scope.webp" width="760" height="509" loading="lazy" decoding="async" alt="The sample workspace lists two Northstar sources."><figcaption>Start with the client brief and source folders.</figcaption></figure></li><li><span>02</span><h3>Scope each source</h3><p>Choose a local folder and agent for this client.</p><figure><img src="/screens/02-block.webp" width="760" height="243" loading="lazy" decoding="async" alt="A session is blocked after text checks fail."><figcaption>Another client name or redaction term stops the session.</figcaption></figure></li><li><span>03</span><h3>Launch and export</h3><p>Open every selected agent in its client profile, then export the delivery record.</p><figure><img src="/screens/03-pass.webp" width="760" height="340" loading="lazy" decoding="async" alt="A clean session passes all boundary checks."><figcaption>Validated launch receipts enable a verified delivery record.</figcaption></figure></li></ol></section>
+    <section class="limits" aria-labelledby="limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="limits-title">What the app checks</h2></div><div><p>The desktop app separates each client’s agent credentials and settings in a client profile.</p><p>Your chosen agent may use its own online service.</p><p>The text check catches named clients and redaction terms before launch.</p></div></section>
+    <section class="downloads" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install the desktop app</h2><p>Choose the package for your system when releases are published.</p></div><div id="download-panel" class="download-panel" aria-live="polite"><p>Checking the latest release…</p></div></section>
+    <section class="pricing" aria-labelledby="price-title"><div><p class="eyebrow">Pro license</p><h2 id="price-title">Pro pricing</h2><p class="price"><strong>$19</strong> once</p><p>Pro lets you create more than two workspaces. Checks and delivery exports remain available on the free plan.</p></div><div class="purchase"><a class="button primary" href="${BILLING}/checkout">Buy Pro ${icon('arrow')}</a><button class="button secondary" id="restore-license">Restore Pro license</button><p>Checkout is handled by Sociobot.</p><p><a href="mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund">Request a refund from Sociobot</a></p><p><a class="nav-link" href="/terms">Read purchase terms</a></p></div></section>
   </main>${footer()}`;
   wireShared();
   document.querySelector('#restore-license')?.addEventListener('click', showLicensePrompt);
@@ -106,7 +117,7 @@ function demoBanner(): string {
 function workspaceShell(): string {
   const active = state.workspaces.find(w => w.id === state.activeId) ?? state.workspaces[0];
   return `${header()}${demo ? demoBanner() : ''}<main id="main" class="workbench" tabindex="-1">
-    <section class="app-heading"><div><p class="eyebrow">${demo ? 'Sample workspace' : 'Local workspace'}</p><h1 tabindex="-1">${active ? 'Check this client session' : 'Create your first client workspace'}</h1></div><div class="state-chip">${navigator.onLine ? 'Device local' : 'Offline · device local'}</div></section>
+    <section class="app-heading"><div><p class="eyebrow">${demo ? 'Sample workspace' : 'Local workspace'}</p><h1 tabindex="-1">${active ? 'Check this client session' : 'Create your first client workspace'}</h1></div><div class="heading-actions">${!demo ? '<button class="text-button" id="export-workspace">Export workspace</button><button class="text-button" id="import-workspace">Import workspace</button>' : ''}<div class="state-chip">${navigator.onLine ? 'Device local' : 'Offline · device local'}</div></div></section>
     ${notice ? `<div class="notice" role="status">${escapeHtml(notice)}${licenseNotice ? ' <a class="nav-link" href="/">Buy Pro</a>' : ''}</div>` : ''}
     ${active ? renderActive(active) : renderEmpty()}
   </main>${footer()}`;
@@ -149,13 +160,17 @@ function workspaceDialog(): string {
   return `<dialog id="workspace-dialog"><form method="dialog" id="workspace-form"><div class="dialog-head"><h2>Create a client workspace</h2><button value="cancel" aria-label="Close dialog">×</button></div><div id="workspace-error" class="form-error" role="alert" aria-live="assertive"></div><label class="field"><span>Client name</span><input name="name" required maxlength="60"></label><label class="field"><span>Client brief</span><textarea name="brief" required rows="3"></textarea></label><label class="field"><span>Writing rule</span><input name="voice" required></label><label class="field"><span>First source label</span><input name="source" required placeholder="client/repository"></label><label class="field"><span>Local folder</span><input name="folder" required placeholder="/path/to/client/project"></label><label class="field"><span>Coding agent</span><select name="connector"><option value="codex">Codex CLI</option><option value="claude">Claude Code</option><option value="gemini">Gemini CLI</option></select></label><label class="field"><span>Account reminder <small>(optional)</small></span><input name="account" type="text"></label><label class="field"><span>First redaction term</span><input name="term" required></label><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button value="default" class="button primary" id="save-workspace">Save workspace</button></div></form></dialog>`;
 }
 
+function importDialog(): string {
+  return `<dialog id="import-dialog"><form method="dialog" id="import-form"><div class="dialog-head"><h2>Import a workspace backup</h2><button value="cancel" aria-label="Close import dialog">×</button></div><div id="import-error" class="form-error" role="alert" aria-live="assertive"></div><p>Select a backup created by this app. It does not include agent sign-ins or license data.</p><label class="field"><span>Workspace backup file</span><input id="import-file" type="file" accept="application/json,.json" required></label><div id="import-preview" hidden><h3>Review imported workspace</h3><p id="import-summary"></p><p>Local folder paths are device-specific. Review every path after import before opening an agent.</p><label class="source-row"><input id="confirm-folder-paths" type="checkbox" required><span><b>I will review saved paths</b><small>Import keeps the saved paths but does not verify they exist on this device.</small></span></label></div><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button value="default" class="button primary" id="finish-import" disabled>Import workspace</button></div></form></dialog>`;
+}
+
 async function renderWorkspace(): Promise<void> {
   demo = location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
-  document.title = demo ? 'Demo — Client Context Firewall' : 'Workspace — Client Context Firewall';
+  setMeta(demo ? 'Demo — Client Context Firewall' : 'Workspace — Client Context Firewall', demo ? 'Try a sample client workspace. Sample changes stay in this tab.' : 'Create and check local client workspaces in the browser preview.', demo ? '/demo' : '/app');
   state = await loadState(demo);
   preparedSession = null;
   notice = getStorageError() || notice;
-  app.innerHTML = workspaceShell();
+  app.innerHTML = `${workspaceShell()}${!demo ? importDialog() : ''}`;
   wireShared(); wireWorkspace();
 }
 
@@ -179,6 +194,37 @@ function wireWorkspace(): void {
     });
   });
   document.querySelector('#new-workspace')?.addEventListener('click', () => (document.querySelector<HTMLDialogElement>('#workspace-dialog'))?.showModal());
+  document.querySelector('#export-workspace')?.addEventListener('click', exportWorkspace);
+  const importDialogNode = document.querySelector<HTMLDialogElement>('#import-dialog');
+  let imported: Workspace | null = null;
+  document.querySelector('#import-workspace')?.addEventListener('click', () => importDialogNode?.showModal());
+  document.querySelector<HTMLInputElement>('#import-file')?.addEventListener('change', async event => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0]; const error = document.querySelector<HTMLDivElement>('#import-error');
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!parsed || parsed.format !== 'client-context-firewall-workspace-v1' || !parsed.workspace?.name || !Array.isArray(parsed.workspace.sources) || !Array.isArray(parsed.workspace.rules)) throw new Error('This is not a Client Context Firewall workspace backup.');
+      const raw = parsed.workspace as Workspace;
+      imported = {...raw, id: uid(), code: String(raw.name).split(/\s+/).map(part => part[0]).join('').slice(0,2).toUpperCase(), updatedAt: new Date().toISOString(), sources: raw.sources.map(source => ({...source, id:uid(), account:''})), rules: raw.rules.map(rule => ({...rule, id:uid()}))};
+      document.querySelector('#import-preview')?.removeAttribute('hidden');
+      document.querySelector('#import-summary')!.textContent = `${imported.name}: ${imported.sources.length} source${imported.sources.length === 1 ? '' : 's'} and ${imported.rules.length} rule${imported.rules.length === 1 ? '' : 's'}.`;
+      (document.querySelector('#finish-import') as HTMLButtonElement).disabled = true;
+      if (error) error.textContent = '';
+    } catch (problem) { imported = null; if (error) error.textContent = problem instanceof Error ? problem.message : 'The backup could not be read.'; }
+  });
+  document.querySelector<HTMLInputElement>('#confirm-folder-paths')?.addEventListener('change', event => {
+    const confirmed = (event.currentTarget as HTMLInputElement).checked;
+    (document.querySelector('#finish-import') as HTMLButtonElement).disabled = !confirmed || !imported;
+  });
+  document.querySelector('#import-form')?.addEventListener('submit', async event => {
+    const submitter = (event as SubmitEvent).submitter as HTMLButtonElement; if (submitter?.value === 'cancel') return; event.preventDefault();
+    const error = document.querySelector<HTMLDivElement>('#import-error');
+    if (!imported || !(document.querySelector<HTMLInputElement>('#confirm-folder-paths')?.checked)) { if (error) error.textContent = 'Confirm the local folder paths before importing.'; return; }
+    if (state.workspaces.length >= 2 && !licenseActive()) { if (error) error.textContent = 'The free plan includes two workspaces. Add a Pro license before importing another.'; return; }
+    const nextState = structuredClone(state); nextState.workspaces.push(imported); nextState.activeId = imported.id;
+    try { await saveState(nextState, false); state = nextState; notice = 'Workspace imported. Confirm local folder paths before opening an agent.'; app.innerHTML = `${workspaceShell()}${importDialog()}`; wireShared(); wireWorkspace(); }
+    catch { if (error) error.textContent = getStorageError(); }
+  });
   document.querySelector('#workspace-form')?.addEventListener('submit', async event => {
     const submitter = (event as SubmitEvent).submitter as HTMLButtonElement;
     if (submitter?.value === 'cancel') return;
@@ -300,19 +346,28 @@ function exportLatest(): void {
   const blob = new Blob([JSON.stringify(record, null, 2)], {type:'application/json'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${active.code.toLowerCase()}-delivery-record.json`; link.click(); URL.revokeObjectURL(link.href);
 }
 
-function legal(kind: 'privacy'|'terms'): void {
-  const privacy = kind === 'privacy'; document.title = `${privacy ? 'Privacy' : 'Terms'} — Client Context Firewall`;
-  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets separate connector credential and config folders. The checked brief, writing rule, redaction rules, and draft are written inside that profile only for the prepared session. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data. The desktop launcher clears inherited provider and API credential variables before it starts your connector. Your chosen coding agent may use its own online service after launch. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app to remove its local records and complete isolated connector profile. A verified delivery record is available only after every selected connector launch succeeds.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Sociobot is the merchant of record and handles billing and refunds.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
+function exportWorkspace(): void {
+  const active = state.workspaces.find(workspace => workspace.id === state.activeId); if (!active) return;
+  const safeWorkspace = {...active, sources: active.sources.map(({account: _account, ...source}) => source)};
+  const backup = {format:'client-context-firewall-workspace-v1', exportedAt:new Date().toISOString(), workspace:safeWorkspace, note:'This backup excludes agent sign-ins, license data, and delivery records. Confirm local folder paths after importing.'};
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${active.code.toLowerCase() || 'client'}-workspace-backup.json`; link.click(); URL.revokeObjectURL(link.href);
 }
 
-function notFound(): void { document.title = 'Page not found — Client Context Firewall'; app.innerHTML = `${header()}<main id="main" class="not-found" tabindex="-1"><p class="huge">404</p><h1 tabindex="-1">This page crossed the wrong boundary</h1><p>The address does not match a page in this workspace.</p><a class="button primary nav-link" href="/">Return home</a></main>${footer()}`; wireShared(); }
+function legal(kind: 'privacy'|'terms'): void {
+  const privacy = kind === 'privacy'; setMeta(`${privacy ? 'Privacy' : 'Terms'} — Client Context Firewall`, privacy ? 'Learn what Client Context Firewall stores and where workspace data goes.' : 'Read the Client Context Firewall purchase and use terms.', `/${kind}`);
+  app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Policy · effective 28 August 2026</p><h1 tabindex="-1">${privacy ? 'Your client data stays under your control' : 'Terms for using the client boundary'}</h1>${privacy ? `<h2>What the app stores</h2><p>The desktop app stores workspaces, source labels, rules, and delivery records in an encrypted file on your device. Its encryption key is stored with your operating system’s credential manager.</p><p>Each desktop workspace gets a separate client profile. The checked brief, writing rule, redaction rules, and draft are written inside that profile only for the prepared session. The browser preview stores workspaces in this browser. Demo data uses a separate session-only key.</p><h2>What leaves your device</h2><p>The browser preview does not send workspace data to another site. Before opening an agent, the app removes API keys inherited from its parent process. Your chosen coding agent may use its own online service after launch. The landing page asks GitHub for public release details. License verification sends only your license token to Sociobot.</p><h2>Delete and export</h2><p>Delete each workspace inside the app to remove its local records and complete client profile. Export a workspace backup to move it. Confirm every local folder path after import.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p>` : `<h2>Use of the app</h2><p>This tool helps you define and check a client boundary. It cannot prevent every disclosure or replace your professional judgment.</p><h2>Pro plan</h2><p>Pro costs $19 once. It lets you create more than two workspaces. Checkout is handled by Sociobot.</p><h2>License</h2><p>You may restore a valid license on another device. A refunded or revoked license stops Pro features. Your free workspaces, checks, and exports remain available.</p><h2>Refunds</h2><p><a href="mailto:support@sociobot.in?subject=Client%20Context%20Firewall%20refund">Request a refund from Sociobot</a>.</p><h2>Warranty</h2><p>The software is provided as is, without a promise that it will catch every mistake. You remain responsible for client agreements and delivered work.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with terms questions.</p>`}</main>${footer()}`; wireShared();
+}
+
+function provenance(): void { setMeta('Art provenance — Client Context Firewall', 'Read how the original Client Context Firewall artwork was made.', '/art-provenance'); app.innerHTML = `${header()}<main id="main" class="legal" tabindex="-1"><p class="eyebrow">Art provenance</p><h1 tabindex="-1">Original art for this product</h1><p>The folder-divider artwork was generated for Client Context Firewall with the factory image model on 28 August 2026.</p><h2>Source record</h2><p>The source PNG and prompt record ship in this repository under <code>assets/src/</code>. The site uses WebP derivatives under <code>public/art/</code>.</p><p>The art shows two separate client folders because the product prevents client work from crossing into another session.</p></main>${footer()}`; wireShared(); }
+
+function notFound(): void { setMeta('Page not found — Client Context Firewall', 'This Client Context Firewall page was not found. Return home or open the demo.', location.pathname); app.innerHTML = `${header()}<main id="main" class="not-found" tabindex="-1"><p class="huge">404</p><h1 tabindex="-1">This page was not found</h1><p>The address does not match a page in this workspace.</p><a class="button primary nav-link" href="/">Return home</a></main>${footer()}`; wireShared(); }
 
 function wireShared(): void {
   document.querySelector('.demo-banner a[href="/app"]')?.addEventListener('click', clearDemo);
-  document.querySelectorAll<HTMLAnchorElement>('a.nav-link').forEach(link => link.addEventListener('click', event => { const url = new URL(link.href); if (url.origin !== location.origin) return; event.preventDefault(); navigate(url.pathname); }));
+  document.querySelectorAll<HTMLAnchorElement>('a.nav-link').forEach(link => link.addEventListener('click', event => { const url = new URL(link.href); if (url.origin !== location.origin) return; event.preventDefault(); navigate(`${url.pathname}${url.search}`); }));
 }
 
-function navigate(path: string): void { history.pushState({}, '', path); route(); }
+function navigate(path: string): void { history.replaceState({...history.state, scrollY:window.scrollY}, ''); history.pushState({scrollY:0}, '', path); void route(true); }
 
 async function showLicensePrompt(): Promise<void> {
   const token = prompt('Paste your Client Context Firewall license token.'); if (!token?.trim()) return;
@@ -340,11 +395,11 @@ function acceptReturnedLicense(): void {
   localStorage.setItem('sb_license:freelancer-agent-context', token); url.searchParams.delete('license'); history.replaceState({}, '', `${url.pathname}${url.search}`); void verifyLicense(token, true);
 }
 
-async function route(): Promise<void> {
-  acceptReturnedLicense(); window.scrollTo(0,0);
+async function route(resetScroll = false): Promise<void> {
+  acceptReturnedLicense(); if (resetScroll) window.scrollTo(0,0);
   const path = location.pathname.replace(/\/$/, '') || '/';
-  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://freelancer-agent-context.sociobot.in${path}`;
-  if (isDesktop() && path === '/') await renderWorkspace(); else if (path === '/') landing(); else if (path === '/demo' || path === '/app') await renderWorkspace(); else if (path === '/privacy' || path === '/terms') legal(path.slice(1) as 'privacy'|'terms'); else notFound();
+  const demoQuery = new URLSearchParams(location.search).get('demo') === '1';
+  if (demoQuery || (isDesktop() && path === '/')) await renderWorkspace(); else if (path === '/') landing(); else if (path === '/demo' || path === '/app') await renderWorkspace(); else if (path === '/privacy' || path === '/terms') legal(path.slice(1) as 'privacy'|'terms'); else if (path === '/art-provenance') provenance(); else notFound();
   const h1 = document.querySelector<HTMLElement>('h1');
   if (h1) {
     status.textContent = h1.textContent ?? '';
@@ -357,7 +412,7 @@ async function route(): Promise<void> {
 
 window.addEventListener('popstate', () => {
   if (location.hash === '#main') { document.querySelector<HTMLElement>('#main')?.focus(); return; }
-  void route();
+  void route(false).then(() => requestAnimationFrame(() => window.scrollTo(0, Number(history.state?.scrollY ?? 0))));
 });
 window.addEventListener('online', () => { if (location.pathname === '/app' || location.pathname === '/demo') renderWorkspace(); });
 window.addEventListener('offline', () => { if (location.pathname === '/app' || location.pathname === '/demo') renderWorkspace(); });

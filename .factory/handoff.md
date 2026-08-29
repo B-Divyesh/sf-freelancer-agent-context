@@ -1,51 +1,34 @@
-# Review handoff — FAIL
-
-Date: 2026-08-29 UTC
-
-Work order: `freelancer-agent-context-review-1`
-
-Candidate: `9a74d496510d6fc6e52c8b5552a20ad082eb2253`
-
-Live URL: <https://freelancer-agent-context.sociobot.in>
+# Polish round 1 handoff
 
 ## Outcome
 
-Completed an adversarial first-read review without changing product code.
-The result is **FAIL**: `.factory/review-1.md` records 8 blocking and 18 minor
-findings. The demo, declared claims, accessibility scan, links, offline reload,
-and clean build pass. The blockers are claim-like statements missing from
-`.factory/claims.json`.
+Repaired every finding in `.factory/review-1.md` for Client Context Firewall
+v0.1.5. The distinct dithered boundary-ledger visual system remains intact.
 
-## Verification performed
+## Delivered
 
-- Cold live loads at 390×844 and 1440×900.
-- Live demo, block/recovery, reset, leave-demo, storage isolation, request log,
-  and offline reload.
-- Every exact `.factory/claims.json` command from a clean remote clone.
-- Full clean-clone `npm test`, typecheck, lint, and production build.
-- Live light/dark Axe scans on `/`, `/demo`, `/app`, `/privacy`, and `/terms`.
-- Route metadata, 404, deep links, History API focus/scroll, console, and link
-  crawl.
-- Every landing/README sentence, heading, label, action, and relevant alt text
-  with word counts.
-- Every earlier verification finding against current live behavior and code.
+- First screen now uses plain job language; headings, labels, terminology, README, and legal copy were rewritten.
+- `/?demo=1` directly opens the isolated sample namespace with banner, reset, and real-start controls; `/demo` remains valid.
+- Added JSON workspace backup/export and reviewable import. Backups omit sign-in reminders, license data, and delivery records; import requires saved-path confirmation.
+- Added missing claim records/tests, art provenance route, direct refund request link, route metadata, 404 skeleton, sitemap route, and Back/Forward scroll preservation.
+- Updated site and desktop version to 0.1.5, including the service-worker cache version.
 
-The clean worker needed the README-declared GTK/WebKit packages before Rust
-claim tests could compile. After installation, all 14 claim commands passed.
-Full suites passed 2 Vitest, 21 Playwright, TypeScript, rustfmt, and Clippy.
-`npm run build` produced `dist/site/`; initial JS was 37.18 KB (12.28 KB gzip).
+## Verification
 
-## What remains
+- `npm ci` — pass.
+- `npm run typecheck` — pass.
+- `npm run test:unit -- --run` — 4 tests passed.
+- Browser claim batch for demo isolation, boundary checking, export, privacy, offline reload/update, plan limit, free core, and backup import — 9 passed.
+- `npm run test:e2e -- --grep @claim:paid-checkout` — pass.
+- `npm run test:unit -- --run -t '@claim:(art-provenance|refund-route|platform-install)'` — 3 claim tests passed.
+- `npx playwright test --grep 'workspace-backup|Back navigation'` — pass after the final import and history changes.
+- `npm run build` — pass; output `dist/site/`; initial JS 13.73 KB gzip and CSS 4.49 KB gzip.
+- GTK/WebKit Tauri prerequisites were installed before the Rust quality/test gates.
 
-Use `.factory/review-1.md` as the repair checklist:
+## Deployment
 
-1. Test, narrow, or remove the eight unlisted claims.
-2. Apply the exact plain-word rewrites for headings, terms, jargon, and the
-   license action.
-3. Bring the real 404 into the shared metadata/header/footer skeleton and use
-   a literal H1.
-4. Preserve scroll position on Back/Forward navigation.
-5. Add safe workspace import/export without credentials and with folder-path
-   reconfirmation.
+Static deployment and cold live verification are recorded after the v0.1.5 commit is pushed and deployed. Desktop release workflow is triggered by the `v0.1.5` tag.
 
-No product, infrastructure, DNS, billing, or release artifact was modified.
+## Known gaps
+
+No product gaps remain. macOS and Windows desktop installers remain intentionally unsigned until the operator provides `APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX` for release signing/notarization.
